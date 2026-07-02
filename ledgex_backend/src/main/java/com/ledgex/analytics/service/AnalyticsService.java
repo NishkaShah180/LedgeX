@@ -50,10 +50,19 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public OverviewAnalyticsResponse getOverview(String userEmail) {
+        return getOverview(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public OverviewAnalyticsResponse getOverview(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate today = LocalDate.now();
-        LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
+        
+        LocalDate monthStart = LocalDate.of(targetYear, targetMonth, 1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
         BigDecimal totalIncome = transactionRepository.sumAmountByUserAndTypeAndDateRange(
                 user.getId(), TransactionType.INCOME, monthStart, monthEnd);
@@ -68,8 +77,8 @@ public class AnalyticsService {
                 .count();
 
         return OverviewAnalyticsResponse.builder()
-                .month(today.getMonthValue())
-                .year(today.getYear())
+                .month(targetMonth)
+                .year(targetYear)
                 .totalIncome(totalIncome)
                 .totalExpense(totalExpense)
                 .netBalance(totalIncome.subtract(totalExpense))
@@ -82,10 +91,19 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public List<CategorySpendingResponse> getSpendingByCategory(String userEmail) {
+        return getSpendingByCategory(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategorySpendingResponse> getSpendingByCategory(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate today = LocalDate.now();
-        LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
+        
+        LocalDate monthStart = LocalDate.of(targetYear, targetMonth, 1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
         List<Object[]> grouped = transactionRepository.sumAmountGroupedByCategory(
                 user.getId(), TransactionType.EXPENSE, monthStart, monthEnd);
@@ -97,14 +115,16 @@ public class AnalyticsService {
         return grouped.stream()
                 .map(row -> {
                     String category = (String) row[0];
-                    BigDecimal amount = (BigDecimal) row[1];
+                    BigDecimal totalAmount = (BigDecimal) row[1];
+                    Long transactionCount = (Long) row[2];
                     BigDecimal percentage = totalExpense.compareTo(BigDecimal.ZERO) == 0
                             ? BigDecimal.ZERO
-                            : amount.multiply(BigDecimal.valueOf(100))
+                            : totalAmount.multiply(BigDecimal.valueOf(100))
                                     .divide(totalExpense, 2, RoundingMode.HALF_UP);
                     return CategorySpendingResponse.builder()
                             .category(category)
-                            .amount(amount)
+                            .totalAmount(totalAmount)
+                            .transactionCount(transactionCount)
                             .percentage(percentage)
                             .build();
                 })
@@ -113,8 +133,16 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public List<MonthlyTrendResponse> getMonthlyTrend(String userEmail) {
+        return getMonthlyTrend(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonthlyTrendResponse> getMonthlyTrend(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
-        YearMonth current = YearMonth.now();
+        LocalDate today = LocalDate.now();
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
+        YearMonth current = YearMonth.of(targetYear, targetMonth);
         List<MonthlyTrendResponse> trend = new ArrayList<>();
 
         for (int i = MONTHLY_TREND_MONTHS - 1; i >= 0; i--) {
@@ -141,10 +169,17 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public List<TopExpenseResponse> getTopExpenses(String userEmail) {
+        return getTopExpenses(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TopExpenseResponse> getTopExpenses(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate today = LocalDate.now();
-        LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
+        LocalDate monthStart = LocalDate.of(targetYear, targetMonth, 1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
         return transactionRepository.findByUserIdAndTypeAndTransactionDateBetweenOrderByAmountDesc(
                         user.getId(), TransactionType.EXPENSE, monthStart, monthEnd)
@@ -156,11 +191,18 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public List<BudgetVsActualResponse> getBudgetVsActual(String userEmail) {
+        return getBudgetVsActual(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BudgetVsActualResponse> getBudgetVsActual(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate today = LocalDate.now();
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
 
         return budgetRepository.findByUserIdAndMonthAndYearOrderByCategoryAsc(
-                        user.getId(), today.getMonthValue(), today.getYear())
+                        user.getId(), targetMonth, targetYear)
                 .stream()
                 .map(budget -> {
                     LocalDate startDate = LocalDate.of(budget.getYear(), budget.getMonth(), 1);
@@ -195,6 +237,11 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public SavingsSummaryAnalyticsResponse getSavingsSummary(String userEmail) {
+        return getSavingsSummary(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public SavingsSummaryAnalyticsResponse getSavingsSummary(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         List<SavingsGoal> goals = savingsGoalRepository.findByUserIdOrderByTargetDateAsc(user.getId());
 
@@ -227,6 +274,11 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public SubscriptionSummaryAnalyticsResponse getSubscriptionSummary(String userEmail) {
+        return getSubscriptionSummary(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public SubscriptionSummaryAnalyticsResponse getSubscriptionSummary(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         List<Subscription> subscriptions = subscriptionRepository.findByUserIdOrderByNextBillingDateAsc(user.getId());
 
@@ -264,10 +316,18 @@ public class AnalyticsService {
 
     @Transactional(readOnly = true)
     public FinancialHealthScoreResponse getFinancialHealthScore(String userEmail) {
+        return getFinancialHealthScore(userEmail, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public FinancialHealthScoreResponse getFinancialHealthScore(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
         LocalDate today = LocalDate.now();
-        LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        int targetMonth = (month != null) ? month : today.getMonthValue();
+        int targetYear = (year != null) ? year : today.getYear();
+        
+        LocalDate monthStart = LocalDate.of(targetYear, targetMonth, 1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
         SavingsSummaryAnalyticsResponse savingsSummary = buildSavingsSummary(user.getId());
         BigDecimal monthlySubscriptionCost = calculateMonthlySubscriptionCost(user.getId());
@@ -277,7 +337,17 @@ public class AnalyticsService {
                 user.getId(), TransactionType.EXPENSE, monthStart, monthEnd);
         BigDecimal netBalance = totalIncome.subtract(totalExpense);
 
-        BigDecimal budgetAdherencePoints = calculateBudgetAdherencePoints(user.getId(), today.getMonthValue(), today.getYear());
+        List<Budget> budgets = budgetRepository.findByUserIdAndMonthAndYearOrderByCategoryAsc(user.getId(), targetMonth, targetYear);
+        
+        if (totalIncome.compareTo(BigDecimal.ZERO) == 0 && totalExpense.compareTo(BigDecimal.ZERO) == 0 && budgets.isEmpty()) {
+            return FinancialHealthScoreResponse.builder()
+                    .score(0)
+                    .rating(HealthRating.POOR)
+                    .explanation("No financial activity recorded for this period.")
+                    .build();
+        }
+
+        BigDecimal budgetAdherencePoints = calculateBudgetAdherencePoints(user.getId(), targetMonth, targetYear);
         BigDecimal savingsProgressPoints = calculateSavingsProgressPoints(savingsSummary.getOverallSavingsProgressPercentage());
         BigDecimal savingsRatePoints = calculateSavingsRatePoints(netBalance, totalIncome);
         BigDecimal subscriptionControlPoints = calculateSubscriptionControlPoints(monthlySubscriptionCost, totalIncome);

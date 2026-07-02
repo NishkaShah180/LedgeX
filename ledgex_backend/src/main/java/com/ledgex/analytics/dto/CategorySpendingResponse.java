@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class CategorySpendingResponse {
 
     private String category;
-    private BigDecimal amount;
+    private BigDecimal totalAmount;
+    private Long transactionCount;
     private BigDecimal percentage;
 }

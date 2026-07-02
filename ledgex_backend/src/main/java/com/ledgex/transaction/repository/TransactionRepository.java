@@ -56,7 +56,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     long countByUserIdAndTransactionDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
     @Query("""
-            SELECT t.category, COALESCE(SUM(t.amount), 0)
+            SELECT t.category, COALESCE(SUM(t.amount), 0), COUNT(t)
             FROM Transaction t
             WHERE t.user.id = :userId
               AND t.type = :type

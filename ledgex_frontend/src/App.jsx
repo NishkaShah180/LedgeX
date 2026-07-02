@@ -11,9 +11,13 @@ import RegisterPage from './pages/RegisterPage'
 import SubscriptionsPage from './pages/SubscriptionsPage'
 import TransactionsPage from './pages/TransactionsPage'
 
+import { Toaster } from 'react-hot-toast'
+
 export default function App() {
   return (
-    <Routes>
+    <>
+      <Toaster position="top-right" />
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<ProtectedRoute />}>
@@ -29,5 +33,6 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }

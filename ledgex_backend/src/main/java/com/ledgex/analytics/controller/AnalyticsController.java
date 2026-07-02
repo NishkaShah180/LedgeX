@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -35,72 +36,88 @@ public class AnalyticsController {
     @GetMapping("/overview")
     @Operation(summary = "Get financial overview for the authenticated user")
     public ResponseEntity<ApiResponse<OverviewAnalyticsResponse>> getOverview(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        OverviewAnalyticsResponse response = analyticsService.getOverview(userDetails.getUsername());
+        OverviewAnalyticsResponse response = analyticsService.getOverview(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/spending-by-category")
-    @Operation(summary = "Get spending breakdown by category for the current month")
+    @Operation(summary = "Get spending breakdown by category for the selected month/year")
     public ResponseEntity<ApiResponse<List<CategorySpendingResponse>>> getSpendingByCategory(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        List<CategorySpendingResponse> responses = analyticsService.getSpendingByCategory(userDetails.getUsername());
+        List<CategorySpendingResponse> responses = analyticsService.getSpendingByCategory(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/monthly-trend")
     @Operation(summary = "Get income and expense trend for the last 6 months")
     public ResponseEntity<ApiResponse<List<MonthlyTrendResponse>>> getMonthlyTrend(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        List<MonthlyTrendResponse> responses = analyticsService.getMonthlyTrend(userDetails.getUsername());
+        List<MonthlyTrendResponse> responses = analyticsService.getMonthlyTrend(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/top-expenses")
     @Operation(summary = "Get top expenses for the current month")
     public ResponseEntity<ApiResponse<List<TopExpenseResponse>>> getTopExpenses(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        List<TopExpenseResponse> responses = analyticsService.getTopExpenses(userDetails.getUsername());
+        List<TopExpenseResponse> responses = analyticsService.getTopExpenses(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/budget-vs-actual")
     @Operation(summary = "Get budget vs actual spending for the current month")
     public ResponseEntity<ApiResponse<List<BudgetVsActualResponse>>> getBudgetVsActual(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        List<BudgetVsActualResponse> responses = analyticsService.getBudgetVsActual(userDetails.getUsername());
+        List<BudgetVsActualResponse> responses = analyticsService.getBudgetVsActual(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/savings-summary")
     @Operation(summary = "Get savings goals analytics summary for the authenticated user")
     public ResponseEntity<ApiResponse<SavingsSummaryAnalyticsResponse>> getSavingsSummary(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        SavingsSummaryAnalyticsResponse response = analyticsService.getSavingsSummary(userDetails.getUsername());
+        SavingsSummaryAnalyticsResponse response = analyticsService.getSavingsSummary(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/subscription-summary")
     @Operation(summary = "Get subscription analytics summary for the authenticated user")
     public ResponseEntity<ApiResponse<SubscriptionSummaryAnalyticsResponse>> getSubscriptionSummary(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        SubscriptionSummaryAnalyticsResponse response = analyticsService.getSubscriptionSummary(userDetails.getUsername());
+        SubscriptionSummaryAnalyticsResponse response = analyticsService.getSubscriptionSummary(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/financial-health-score")
     @Operation(summary = "Get financial health score for the authenticated user")
     public ResponseEntity<ApiResponse<FinancialHealthScoreResponse>> getFinancialHealthScore(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        FinancialHealthScoreResponse response = analyticsService.getFinancialHealthScore(userDetails.getUsername());
+        FinancialHealthScoreResponse response = analyticsService.getFinancialHealthScore(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

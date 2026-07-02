@@ -38,15 +38,15 @@ public class AIInsightsService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public FinancialInsightsResponse getFinancialInsights(String userEmail) {
+    public FinancialInsightsResponse getFinancialInsights(String userEmail, Integer month, Integer year) {
         User user = getUserByEmail(userEmail);
 
-        FinancialHealthScoreResponse healthScore = analyticsService.getFinancialHealthScore(userEmail);
-        OverviewAnalyticsResponse overview = analyticsService.getOverview(userEmail);
-        List<BudgetVsActualResponse> budgets = analyticsService.getBudgetVsActual(userEmail);
-        List<CategorySpendingResponse> spendingByCategory = analyticsService.getSpendingByCategory(userEmail);
-        SubscriptionSummaryAnalyticsResponse subscriptionSummary = analyticsService.getSubscriptionSummary(userEmail);
-        List<MonthlyTrendResponse> monthlyTrend = analyticsService.getMonthlyTrend(userEmail);
+        FinancialHealthScoreResponse healthScore = analyticsService.getFinancialHealthScore(userEmail, month, year);
+        OverviewAnalyticsResponse overview = analyticsService.getOverview(userEmail, month, year);
+        List<BudgetVsActualResponse> budgets = analyticsService.getBudgetVsActual(userEmail, month, year);
+        List<CategorySpendingResponse> spendingByCategory = analyticsService.getSpendingByCategory(userEmail, month, year);
+        SubscriptionSummaryAnalyticsResponse subscriptionSummary = analyticsService.getSubscriptionSummary(userEmail, month, year);
+        List<MonthlyTrendResponse> monthlyTrend = analyticsService.getMonthlyTrend(userEmail, month, year);
         List<SavingsGoal> savingsGoals = savingsGoalRepository.findByUserIdOrderByTargetDateAsc(user.getId());
 
         List<String> warnings = new ArrayList<>();
@@ -175,7 +175,7 @@ public class AIInsightsService {
     ) {
         spendingByCategory.stream()
                 .filter(spending -> isEntertainmentCategory(spending.getCategory()))
-                .filter(spending -> spending.getAmount().compareTo(BigDecimal.ZERO) > 0)
+                .filter(spending -> spending.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
                 .findFirst()
                 .ifPresent(spending -> recommendations.add(
                         "Reduce " + spending.getCategory().toLowerCase() + " spending by 15%"));

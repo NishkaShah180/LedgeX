@@ -26,9 +26,11 @@ public class AIInsightsController {
     @GetMapping("/financial-insights")
     @Operation(summary = "Get rule-based financial insights for the authenticated user")
     public ResponseEntity<ApiResponse<FinancialInsightsResponse>> getFinancialInsights(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
     ) {
-        FinancialInsightsResponse response = aiInsightsService.getFinancialInsights(userDetails.getUsername());
+        FinancialInsightsResponse response = aiInsightsService.getFinancialInsights(userDetails.getUsername(), month, year);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

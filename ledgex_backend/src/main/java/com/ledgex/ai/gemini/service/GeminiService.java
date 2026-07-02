@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledgex.ai.dto.FinancialInsightsResponse;
 import com.ledgex.ai.gemini.config.GeminiProperties;
+import com.ledgex.ai.gemini.dto.ChatRequestDTO;
+import com.ledgex.ai.gemini.dto.ChatResponseDTO;
 import com.ledgex.ai.gemini.dto.GeminiRequestDTO;
 import com.ledgex.ai.gemini.dto.GeminiResponseDTO;
 import com.ledgex.ai.service.AIInsightsService;
@@ -66,8 +68,8 @@ public class GeminiService {
     private final RestClient.Builder restClientBuilder;
 
     @Transactional(readOnly = true)
-    public GeminiResponseDTO getGeminiInsights(String userEmail) {
-        GeminiRequestDTO request = buildRequest(userEmail);
+    public GeminiResponseDTO getGeminiInsights(String userEmail, Integer month, Integer year) {
+        GeminiRequestDTO request = buildRequest(userEmail, month, year);
 
         if (!isGeminiConfigured()) {
             log.warn("Gemini API key is not configured; returning fallback insights");
@@ -84,16 +86,16 @@ public class GeminiService {
         }
     }
 
-    private GeminiRequestDTO buildRequest(String userEmail) {
-        FinancialInsightsResponse ruleBasedInsights = aiInsightsService.getFinancialInsights(userEmail);
+    private GeminiRequestDTO buildRequest(String userEmail, Integer month, Integer year) {
+        FinancialInsightsResponse ruleBasedInsights = aiInsightsService.getFinancialInsights(userEmail, month, year);
 
         return GeminiRequestDTO.builder()
-                .financialHealthScore(analyticsService.getFinancialHealthScore(userEmail))
-                .overview(analyticsService.getOverview(userEmail))
-                .spendingByCategory(analyticsService.getSpendingByCategory(userEmail))
-                .budgetVsActual(analyticsService.getBudgetVsActual(userEmail))
-                .savingsSummary(analyticsService.getSavingsSummary(userEmail))
-                .subscriptionSummary(analyticsService.getSubscriptionSummary(userEmail))
+                .financialHealthScore(analyticsService.getFinancialHealthScore(userEmail, month, year))
+                .overview(analyticsService.getOverview(userEmail, month, year))
+                .spendingByCategory(analyticsService.getSpendingByCategory(userEmail, month, year))
+                .budgetVsActual(analyticsService.getBudgetVsActual(userEmail, month, year))
+                .savingsSummary(analyticsService.getSavingsSummary(userEmail, month, year))
+                .subscriptionSummary(analyticsService.getSubscriptionSummary(userEmail, month, year))
                 .ruleBasedInsights(ruleBasedInsights)
                 .build();
     }
@@ -245,7 +247,7 @@ public class GeminiService {
         StringBuilder lines = new StringBuilder();
         for (CategorySpendingResponse spending : spendingByCategory) {
             lines.append("- ").append(spending.getCategory())
-                    .append(": ").append(formatAmount(spending.getAmount()))
+                    .append(": ").append(formatAmount(spending.getTotalAmount()))
                     .append(" (").append(spending.getPercentage().setScale(0, RoundingMode.HALF_UP))
                     .append("%)\n");
         }
@@ -298,6 +300,125 @@ public class GeminiService {
         String text = apiResponse.candidates.getFirst().content.parts.getFirst().text;
         if (text == null || text.isBlank()) {
             throw new RestClientException("Gemini API returned empty text content");
+        }
+
+        return text;
+    }
+
+    public ChatResponseDTO chatWithCoach(String userEmail, ChatRequestDTO chatRequest) {
+        if (!isGeminiConfigured()) {
+            return new ChatResponseDTO("I'm currently offline, but I'll be back soon to help you with your finances!");
+        }
+
+        try {
+            GeminiRequestDTO data = buildRequest(userEmail, chatRequest.getMonth(), chatRequest.getYear());
+            String prompt = buildChatPrompt(data, userEmail, chatRequest.getPrompt());
+            String responseText = callGeminiChatApi(prompt);
+            return new ChatResponseDTO(responseText);
+        } catch (Exception exception) {
+            log.error("Gemini Chat API call failed", exception);
+            return new ChatResponseDTO("I'm having trouble analyzing your data right now. Please try again later.");
+        }
+    }
+
+    private String buildChatPrompt(GeminiRequestDTO request, String userEmail, String userPrompt) {
+        FinancialHealthScoreResponse healthScore = request.getFinancialHealthScore();
+        OverviewAnalyticsResponse overview = request.getOverview();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<SavingsGoal> savingsGoals = savingsGoalRepository.findByUserIdOrderByTargetDateAsc(user.getId());
+        List<Subscription> activeSubscriptions = subscriptionRepository
+                .findByUserIdAndIsActiveTrueOrderByNextBillingDateAsc(user.getId());
+
+        String rating = healthScore.getRating().name().toLowerCase();
+        String budgetLines = formatBudgetLines(request.getBudgetVsActual());
+        String savingsGoalLines = formatSavingsGoalLines(savingsGoals);
+        String subscriptionLines = formatSubscriptionLines(activeSubscriptions);
+        String spendingLines = formatSpendingLines(request.getSpendingByCategory());
+
+        return """
+                You are LedgeX Financial Coach, a friendly, encouraging, and highly capable personal finance advisor.
+                You are talking directly to %s.
+
+                Here is the user's financial context for the requested time period:
+                - Health Score: %d/100 (%s)
+                - Income: %s
+                - Expenses: %s
+                - Net Balance: %s
+
+                Spending by Category:
+                %s
+
+                Budgets:
+                %s
+
+                Savings Goals:
+                %s
+
+                Subscriptions:
+                %s
+
+                The user is asking you a question: "%s"
+
+                Respond directly to the user in a conversational, helpful, and professional tone.
+                Base your advice strictly on their actual financial data provided above.
+                Explain the "why" behind your recommendations (e.g. "If you do X, it will save you Y").
+                Do not use complex jargon. Avoid overwhelming them with numbers, but do reference their specific amounts where it makes your advice more actionable.
+                Keep your response concise, ideally 3-5 sentences.
+                Do NOT output JSON. Output plain text (with basic markdown like bold or bullets if needed).
+                """.formatted(
+                user.getFirstName(),
+                healthScore.getScore(),
+                rating,
+                formatAmount(overview.getTotalIncome()),
+                formatAmount(overview.getTotalExpense()),
+                formatAmount(overview.getNetBalance()),
+                spendingLines,
+                budgetLines,
+                savingsGoalLines,
+                subscriptionLines,
+                userPrompt
+        );
+    }
+
+    private String callGeminiChatApi(String prompt) throws JsonProcessingException {
+        Map<String, Object> generationConfig = Map.of(
+                "temperature", 0.7
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", List.of(Map.of(
+                        "parts", List.of(Map.of("text", prompt))
+                )),
+                "generationConfig", generationConfig
+        );
+
+        RestClient restClient = restClientBuilder
+                .baseUrl(geminiProperties.getBaseUrl())
+                .build();
+
+        GeminiApiResponse apiResponse = restClient.post()
+                .uri("/models/{model}:generateContent?key={apiKey}",
+                        geminiProperties.getModel(),
+                        geminiProperties.getApiKey())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .retrieve()
+                .body(GeminiApiResponse.class);
+
+        if (apiResponse == null
+                || apiResponse.candidates == null
+                || apiResponse.candidates.isEmpty()
+                || apiResponse.candidates.getFirst().content == null
+                || apiResponse.candidates.getFirst().content.parts == null
+                || apiResponse.candidates.getFirst().content.parts.isEmpty()) {
+            throw new org.springframework.web.client.RestClientException("Gemini API returned an empty response");
+        }
+
+        String text = apiResponse.candidates.getFirst().content.parts.getFirst().text;
+        if (text == null || text.isBlank()) {
+            throw new org.springframework.web.client.RestClientException("Gemini API returned empty text content");
         }
 
         return text;
