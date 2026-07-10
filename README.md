@@ -241,7 +241,7 @@ Runs on `http://localhost:5173`
 
 ## 👤 Author
 
-Built as part of an academic/personal project to demonstrate full-stack development with AI integration.
+Nishka Shah
 
 ---
 
