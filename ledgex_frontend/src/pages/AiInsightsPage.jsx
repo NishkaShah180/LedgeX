@@ -4,9 +4,12 @@ import api from '../api/axios';
 import { 
   Sparkles, Smile, AlertCircle, CheckCircle, 
   Target, MessageCircle, Send,
-  TrendingUp, Award, Calendar, Loader2
+  TrendingUp, Award, Calendar, Loader2,
+  DollarSign, CreditCard, Lightbulb, ShieldCheck, 
+  TrendingDown, Wallet, PiggyBank, BrainCircuit, Activity
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import PageHeader from '../components/PageHeader';
 
 export default function AiInsightsPage() {
   const { user } = useAuth();
@@ -25,6 +28,7 @@ export default function AiInsightsPage() {
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatError, setChatError] = useState(null);
   const chatEndRef = useRef(null);
 
   const monthNamesFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -65,6 +69,7 @@ export default function AiInsightsPage() {
     // Add user message to history
     setChatHistory(prev => [...prev, { role: 'user', text: messageToSend }]);
     setChatPrompt("");
+    setChatError(null);
     setIsChatLoading(true);
 
     try {
@@ -77,7 +82,8 @@ export default function AiInsightsPage() {
       const reply = response.data?.data?.response || "I'm sorry, I couldn't process that request.";
       setChatHistory(prev => [...prev, { role: 'coach', text: reply }]);
     } catch (err) {
-      setChatHistory(prev => [...prev, { role: 'coach', text: "I'm having trouble analyzing your data right now. Please try again later." }]);
+      const errorMessage = err.response?.data?.message || "I'm having trouble analyzing your data right now. Please try again later.";
+      setChatError(errorMessage);
       console.error(err);
     } finally {
       setIsChatLoading(false);
@@ -95,12 +101,12 @@ export default function AiInsightsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
         <div className="relative">
-          <div className="absolute inset-0 bg-emerald-200 rounded-full animate-ping opacity-75"></div>
-          <div className="relative bg-emerald-100 p-4 rounded-full">
-            <Sparkles className="w-8 h-8 text-emerald-600 animate-pulse" />
+          <div className="absolute inset-0 bg-emerald-200 dark:bg-emerald-800 rounded-full animate-ping opacity-75"></div>
+          <div className="relative bg-emerald-100 dark:bg-emerald-900 p-4 rounded-full transition-colors duration-200">
+            <Sparkles className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-pulse" />
           </div>
         </div>
-        <p className="mt-6 text-emerald-800 font-medium animate-pulse">Your Financial Coach is analyzing your data...</p>
+        <p className="mt-6 text-emerald-800 dark:text-emerald-300 font-medium animate-pulse transition-colors duration-200">Your Financial Coach is analyzing your data...</p>
       </div>
     );
   }
@@ -108,21 +114,24 @@ export default function AiInsightsPage() {
   // Derived state for the UI
   const healthScore = basicInsights?.financialHealthScore || 0;
   
-  let statusColor = "from-emerald-100 to-emerald-50 text-emerald-900 border-emerald-200";
-  let iconColor = "text-emerald-500 bg-emerald-100";
-  let statusTitle = "You're doing well";
-  let StatusIcon = Smile;
+  let statusColor = "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400";
+  let iconColor = "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30";
+  let statusTitle = "Excellent";
+  let StatusIcon = ShieldCheck;
+  let statusMessage = "Your overall financial situation is strong this month. You're balancing spending and saving well.";
 
   if (healthScore < 50) {
-    statusColor = "from-rose-100 to-rose-50 text-rose-900 border-rose-200";
-    iconColor = "text-rose-500 bg-rose-100";
-    statusTitle = "Needs attention";
+    statusColor = "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400";
+    iconColor = "text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30";
+    statusTitle = "Needs Attention";
     StatusIcon = AlertCircle;
+    statusMessage = "Your finances need some attention this month. Let's look at ways to get back on track.";
   } else if (healthScore < 75) {
-    statusColor = "from-amber-100 to-amber-50 text-amber-900 border-amber-200";
-    iconColor = "text-amber-500 bg-amber-100";
-    statusTitle = "You're making steady progress";
+    statusColor = "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400";
+    iconColor = "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30";
+    statusTitle = "Good";
     StatusIcon = Target;
+    statusMessage = "Your finances are stable, but there's room for improvement in your spending habits.";
   }
 
   const allRecommendations = [
@@ -139,223 +148,286 @@ export default function AiInsightsPage() {
   const achievements = basicInsights?.achievements || [];
   
   const suggestedPrompts = [
-    '💰 Help me save more',
-    '📈 Analyze this month',
-    '🛍 Am I overspending?',
-    '🎯 My savings goals',
-    '💳 My subscriptions',
-    '💡 How can I reach my goals faster?'
+    { text: 'How can I save more?', icon: DollarSign },
+    { text: 'Why did I spend more this month?', icon: TrendingUp },
+    { text: 'How am I doing overall?', icon: Activity },
+    { text: 'Can I afford a vacation?', icon: Target },
+    { text: 'Which subscriptions should I cancel?', icon: CreditCard }
   ];
 
+  const getCardDetails = (text, index) => {
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes('save') || lowerText.includes('savings') || lowerText.includes('deposit')) return { icon: PiggyBank, title: 'Increase Savings', text };
+    if (lowerText.includes('budget') || lowerText.includes('spend') || lowerText.includes('expense')) return { icon: Wallet, title: 'Watch Spending', text };
+    if (lowerText.includes('invest') || lowerText.includes('goal') || lowerText.includes('habit')) return { icon: TrendingUp, title: 'Keep the Momentum', text };
+    const icons = [Lightbulb, Target, BrainCircuit];
+    return { icon: icons[index % icons.length], title: 'Financial Tip', text };
+  };
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 pb-20">
       
       {/* Header & Time Period */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 flex items-center mb-2">
-            <span className="text-emerald-500 mr-3">💚</span> LedgeX Financial Coach
-          </h1>
-          <p className="text-gray-600 text-lg">
-            👋 Hi {user?.firstName || 'there'}! I've reviewed your finances for {monthNamesFull[selectedMonth - 1]} {selectedYear}. Let's see how you're doing.
-          </p>
-        </div>
-        <div className="flex space-x-3 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="bg-transparent text-gray-700 focus:ring-0 block text-sm font-medium outline-none cursor-pointer"
-          >
-            {monthNamesFull.map((m, i) => (
-              <option key={i} value={i + 1}>{m}</option>
-            ))}
-          </select>
-          <div className="w-px bg-gray-300"></div>
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="bg-transparent text-gray-700 focus:ring-0 block text-sm font-medium outline-none cursor-pointer"
-          >
-            {[2023, 2024, 2025, 2026, 2027].map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <PageHeader
+        title="AI Insights"
+        subtitle={`Hi ${user?.firstName || 'there'}! I've reviewed your finances for ${monthNamesFull[selectedMonth - 1]} ${selectedYear}. Let's see how you're doing.`}
+        action={
+          <div className="flex space-x-3 bg-white dark:bg-gray-800 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex-1 md:flex-none transition-colors duration-200">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="bg-transparent text-gray-800 dark:text-gray-200 focus:ring-0 block text-sm font-bold outline-none cursor-pointer px-2 transition-colors duration-200"
+            >
+              {monthNamesFull.map((m, i) => (
+                <option key={i} value={i + 1} className="dark:bg-gray-800">{m}</option>
+              ))}
+            </select>
+            <div className="w-px bg-gray-200 dark:bg-gray-700 transition-colors duration-200"></div>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-gray-800 dark:text-gray-200 focus:ring-0 block text-sm font-bold outline-none cursor-pointer px-2 transition-colors duration-200"
+            >
+              {[2023, 2024, 2025, 2026, 2027].map(y => (
+                <option key={y} value={y} className="dark:bg-gray-800">{y}</option>
+              ))}
+            </select>
+          </div>
+        }
+      />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-start animate-fade-in-up">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 px-6 py-4 rounded-2xl flex items-start animate-fade-in-up transition-colors duration-200">
           <AlertCircle className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
-      <div className={`space-y-8 transition-opacity duration-500 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`space-y-12 transition-opacity duration-500 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
         
         {/* Section 1: Today's Financial Check-in */}
         <section className="animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-          <div className={`p-8 rounded-3xl border bg-gradient-to-br shadow-sm flex flex-col sm:flex-row items-center sm:items-start transition-all hover:shadow-md ${statusColor}`}>
-            <div className={`p-5 rounded-2xl shadow-sm mb-4 sm:mb-0 sm:mr-6 flex-shrink-0 bg-white`}>
-              <StatusIcon className={`w-12 h-12 ${iconColor.split(' ')[0]}`} />
+          <div className="p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center transition-all hover:shadow-md duration-200">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 md:mb-0">
+              <div className={`p-3 rounded-xl mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 transition-colors duration-200 ${iconColor}`}>
+                <StatusIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5 transition-colors duration-200">{statusTitle}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium max-w-xl transition-colors duration-200">
+                  {statusMessage}
+                </p>
+              </div>
             </div>
-            <div className="text-center sm:text-left pt-2">
-              <h3 className="text-2xl font-bold mb-3 tracking-tight">{statusTitle}</h3>
-              <p className="text-lg opacity-90 leading-relaxed max-w-2xl font-medium">
-                {basicInsights?.topInsight || "Everything is looking good right now. Keep maintaining your healthy financial habits!"}
-              </p>
+            <div className="md:ml-4 flex-shrink-0 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-4 py-2 rounded-xl flex items-center self-start md:self-auto w-full md:w-auto transition-colors duration-200">
+               <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mr-3 transition-colors duration-200">Financial Health</span>
+               <span className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors duration-200 ${statusColor}`}>
+                 {statusTitle}
+               </span>
             </div>
           </div>
         </section>
 
-        {/* Section 2: What I Noticed */}
-        {geminiInsights?.financialSummary && (
-          <section className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 ml-2 flex items-center">
-              <Sparkles className="w-5 h-5 mr-2 text-emerald-500" />
-              What I Noticed
-            </h2>
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-100 to-transparent opacity-50 rounded-bl-full pointer-events-none"></div>
-              <p className="text-gray-700 text-lg leading-relaxed font-medium relative z-10">
-                "{geminiInsights.financialSummary}"
-              </p>
-            </div>
-          </section>
-        )}
+        {/* Section 2: Monthly Review */}
+        <section className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center transition-colors duration-200">
+            <BrainCircuit className="w-5 h-5 mr-2 text-emerald-600 dark:text-emerald-500" />
+            Monthly Review
+          </h2>
+          <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-sm relative overflow-hidden group border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-50 dark:from-emerald-900/20 to-transparent opacity-50 rounded-bl-full pointer-events-none transition-colors duration-200"></div>
+            <ul className="relative z-10 space-y-6">
+              <li className="flex items-start">
+                <div className={`p-2.5 rounded-xl mr-4 flex-shrink-0 transition-colors duration-200 ${healthScore >= 75 ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50' : healthScore >= 50 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/50'}`}>
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div className="pt-0.5">
+                  <h4 className="text-gray-900 dark:text-white font-semibold mb-1 text-lg transition-colors duration-200">Overall Balance</h4>
+                  <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed transition-colors duration-200">
+                   {healthScore >= 75 ? "Your income comfortably exceeded your spending, allowing you to save a good portion of what you earned." : 
+                    healthScore >= 50 ? "Your spending was mostly under control, but you have opportunities to optimize your savings." : 
+                    "Your spending outpaced your optimal budget levels, meaning you have less surplus left for savings."}
+                  </p>
+                </div>
+              </li>
+              
+              {achievements.length > 0 && (
+                <li className="flex items-start">
+                  <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 rounded-xl mr-4 flex-shrink-0 transition-colors duration-200">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                  <div className="pt-0.5">
+                    <h4 className="text-gray-900 dark:text-white font-semibold mb-1 text-lg transition-colors duration-200">Milestones Achieved</h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed transition-colors duration-200">
+                      You hit some great milestones this month, which is a strong indicator of consistent financial habits.
+                    </p>
+                  </div>
+                </li>
+              )}
+              
+              {warnings.length > 0 && (
+                <li className="flex items-start">
+                  <div className="p-2.5 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/50 rounded-xl mr-4 flex-shrink-0 transition-colors duration-200">
+                    <AlertCircle className="w-5 h-5" />
+                  </div>
+                  <div className="pt-0.5">
+                    <h4 className="text-gray-900 dark:text-white font-semibold mb-1 text-lg transition-colors duration-200">Areas to Monitor</h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed transition-colors duration-200">
+                      We noticed a few areas needing attention—like your {warnings[0].toLowerCase().replace('budget is at', 'budget getting close to').replace('%', 'percent')}.
+                    </p>
+                  </div>
+                </li>
+              )}
+            </ul>
+          </div>
+        </section>
 
         {/* Grid for Actions, Wins, Risks */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          {/* Section 3: What I'd Do Next */}
+          {/* Section 3: Recommended Actions */}
           <section className="md:col-span-2 animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 ml-2">What I'd Do Next</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center transition-colors duration-200">
+              <Lightbulb className="w-5 h-5 mr-2 text-emerald-600 dark:text-emerald-500" />
+              Recommended Actions
+            </h2>
             {allRecommendations.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {allRecommendations.slice(0, 4).map((action, i) => (
-                  <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all flex flex-col justify-center h-full relative overflow-hidden group">
-                    <div className="absolute -right-4 -bottom-4 bg-emerald-50 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                    <div className="flex items-start z-10">
-                      <div className="bg-emerald-100 p-2 rounded-xl mr-4 text-emerald-600 flex-shrink-0">
-                        <Target className="w-5 h-5" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {allRecommendations.slice(0, 4).map((action, i) => {
+                  const details = getCardDetails(action, i);
+                  const Icon = details.icon;
+                  return (
+                    <div key={i} className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all flex flex-col h-full group duration-200">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 mr-3 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white transition-colors duration-200">{details.title}</h3>
                       </div>
-                      <p className="text-gray-700 text-base font-medium leading-relaxed">{action}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium leading-relaxed transition-colors duration-200">{details.text}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-center text-gray-500 font-medium">
-                You're all set! No specific actions needed right now.
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 text-center shadow-sm transition-colors duration-200">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors duration-200">You're all set! No specific actions needed right now.</p>
               </div>
             )}
           </section>
 
           {/* Section 4: Tiny Wins */}
           <section className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 ml-2 flex items-center">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center transition-colors duration-200">
               <Award className="w-5 h-5 text-blue-500 mr-2" />
               Tiny Wins
             </h2>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden h-full">
-              {achievements.length > 0 ? (
-                <div className="divide-y divide-gray-50">
-                  {achievements.map((win, i) => (
-                    <div key={i} className="p-5 flex items-center hover:bg-blue-50/50 transition-colors">
-                      <div className="bg-blue-100 rounded-full p-2 mr-4 flex-shrink-0 text-2xl">
-                        🎉
-                      </div>
-                      <p className="text-gray-700 font-medium">{win}</p>
+            {achievements.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {achievements.map((win, i) => (
+                  <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-2xl flex items-center shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/30 p-1.5 rounded-lg mr-3 flex-shrink-0 transition-colors duration-200">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500 h-full flex flex-col justify-center">
-                  Keep up the good habits to earn your first win!
-                </div>
-              )}
-            </div>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 font-medium leading-relaxed transition-colors duration-200">{win}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 text-center shadow-sm h-full flex flex-col justify-center transition-colors duration-200">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors duration-200">Keep up the good habits to earn your first win!</p>
+              </div>
+            )}
           </section>
 
-          {/* Section 5: Things to Watch */}
+          {/* Section 5: Watchlist */}
           <section className="animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 ml-2 flex items-center">
-              <TrendingUp className="w-5 h-5 text-amber-500 mr-2" />
-              Things to Watch
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center transition-colors duration-200">
+              <AlertCircle className="w-5 h-5 text-amber-500 mr-2" />
+              Watchlist
             </h2>
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden h-full">
-              {warnings.length > 0 ? (
-                <div className="divide-y divide-gray-50">
-                  {warnings.map((warning, i) => (
-                    <div key={i} className="p-5 flex items-center hover:bg-amber-50/50 transition-colors">
-                      <div className="bg-amber-100 rounded-full p-2 mr-4 flex-shrink-0 text-xl">
-                        ⚠
+            {warnings.length > 0 ? (
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 transition-colors duration-200">
+                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 transition-colors duration-200">Budget Alerts</h3>
+                 <div className="flex flex-col gap-3">
+                  {warnings.map((warning, i) => {
+                    let cat = "General";
+                    let status = "Attention";
+                    if (warning.toLowerCase().includes('budget')) {
+                       cat = warning.split(' budget')[0].trim();
+                       status = "Near Limit";
+                    }
+                    cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    return (
+                      <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-3 rounded-xl transition-colors duration-200">
+                        <span className="text-sm text-gray-800 dark:text-gray-200 font-bold transition-colors duration-200">{cat}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 transition-colors duration-200">{status}</span>
                       </div>
-                      <p className="text-gray-700 font-medium">{warning}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500 h-full flex flex-col justify-center">
-                  No immediate concerns detected. Your finances look stable!
-                </div>
-              )}
-            </div>
+                    )
+                  })}
+                 </div>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 text-center shadow-sm h-full flex flex-col justify-center transition-colors duration-200">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors duration-200">No immediate concerns detected. Your finances look stable!</p>
+              </div>
+            )}
           </section>
 
         </div>
 
         {/* Section 6: Talk to Your Financial Coach */}
-        <section className="mt-12 bg-white rounded-3xl border border-gray-200 shadow-md overflow-hidden animate-fade-in-up flex flex-col h-[600px]" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
+        <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden animate-fade-in-up flex flex-col h-[600px] mt-8 transition-colors duration-200" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
           
           {/* Chat Header */}
-          <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-white flex-shrink-0">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center">
-              <div className="bg-emerald-100 p-2 rounded-full mr-3">
-                <MessageCircle className="w-5 h-5 text-emerald-600" />
-              </div>
-              Talk to Your Financial Coach
-            </h2>
-            <p className="text-gray-500 mt-2 text-sm ml-12">
-              I can analyze your budget, track your goals, and give personalized advice.
-            </p>
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-white dark:bg-gray-900 flex items-center transition-colors duration-200">
+            {/* Future LedgeX Logo Container */}
+            <div className="w-8 h-8 bg-emerald-600 dark:bg-emerald-500 rounded-lg flex items-center justify-center mr-3 shadow-sm transition-colors duration-200">
+               <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-white transition-colors duration-200">
+                LedgeX Assistant
+              </h2>
+            </div>
           </div>
           
           {/* Chat Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/30">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white dark:bg-gray-900 transition-colors duration-200">
             {chatHistory.length === 0 ? (
-              <div className="flex flex-col h-full justify-center items-center text-center max-w-lg mx-auto">
-                <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                  <Smile className="w-8 h-8 text-emerald-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                  Hi {user?.firstName} 👋 What would you like help understanding today?
+              <div className="flex flex-col h-full justify-center items-center text-center max-w-3xl mx-auto pb-10">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-8 transition-colors duration-200">
+                  How can I help you today, {user?.firstName}?
                 </h3>
-                <p className="text-gray-500 mb-8 text-sm">
-                  Select a topic below or type your own question. I'll use your actual {monthNamesFull[selectedMonth - 1]} data to answer.
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                   {suggestedPrompts.map((prompt, i) => (
                     <button 
                       key={i} 
-                      onClick={() => handleSendMessage(prompt)}
-                      className="bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm shadow-sm transition-colors text-left"
+                      onClick={() => handleSendMessage(prompt.text)}
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-4 py-2.5 rounded-full text-sm font-medium transition-colors text-left flex items-center group duration-200"
                     >
-                      {prompt}
+                      <prompt.icon className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                      {prompt.text}
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-4xl mx-auto">
                 {chatHistory.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 ${
+                    {msg.role !== 'user' && (
+                      <div className="w-8 h-8 bg-emerald-600 dark:bg-emerald-500 rounded-lg flex items-center justify-center mr-3 shadow-sm flex-shrink-0 mt-1 transition-colors duration-200">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 transition-colors duration-200 ${
                       msg.role === 'user' 
-                        ? 'bg-emerald-600 text-white shadow-md rounded-br-none' 
-                        : 'bg-white border border-gray-100 shadow-sm text-gray-800 rounded-bl-none prose prose-sm prose-emerald'
+                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' 
+                        : 'text-gray-800 dark:text-gray-200 prose prose-sm prose-emerald dark:prose-invert'
                     }`}>
                       {msg.role === 'user' ? (
-                        <p className="m-0 text-[15px]">{msg.text}</p>
+                        <p className="m-0 text-sm font-medium">{msg.text}</p>
                       ) : (
                         <ReactMarkdown>{msg.text}</ReactMarkdown>
                       )}
@@ -365,10 +437,13 @@ export default function AiInsightsPage() {
                 
                 {isChatLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-bl-none p-4 flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-emerald-300 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-8 h-8 bg-emerald-600 dark:bg-emerald-500 rounded-lg flex items-center justify-center mr-3 shadow-sm flex-shrink-0 mt-1 transition-colors duration-200">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="p-4 flex items-center space-x-1.5 h-[52px]">
+                      <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
                     </div>
                   </div>
                 )}
@@ -378,29 +453,45 @@ export default function AiInsightsPage() {
           </div>
 
           {/* Chat Input Area */}
-          <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
-            <div className="relative max-w-4xl mx-auto flex items-end bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-50 transition-all p-1 shadow-inner">
+          <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex-shrink-0 transition-colors duration-200">
+            <div className="relative max-w-4xl mx-auto flex items-end bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:border-gray-300 dark:focus-within:border-gray-600 focus-within:ring-4 focus-within:ring-gray-100 dark:focus-within:ring-gray-800 transition-all p-1.5">
               <textarea 
                 value={chatPrompt}
                 onChange={(e) => setChatPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything about your finances..." 
-                className="w-full bg-transparent border-none focus:ring-0 resize-none py-3 pl-4 pr-12 text-gray-700 min-h-[52px] max-h-[120px]"
+                placeholder="Message LedgeX Assistant..." 
+                className="w-full bg-transparent border-none focus:ring-0 resize-none py-2.5 pl-3 pr-14 text-sm font-medium text-gray-800 dark:text-white min-h-[44px] max-h-[120px] transition-colors duration-200"
                 rows={1}
                 disabled={isChatLoading}
               />
               <button 
                 onClick={() => handleSendMessage()}
                 disabled={!chatPrompt.trim() || isChatLoading}
-                className="absolute right-2 bottom-2 p-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="absolute right-2.5 bottom-2.5 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
               >
-                {isChatLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 ml-0.5" />}
+                {isChatLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 ml-0.5" />}
               </button>
             </div>
-            <p className="text-center text-xs text-gray-400 mt-3">
-              The AI Coach uses your actual LedgeX financial data to provide personalized guidance.
+            <p className="text-center text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-2 transition-colors duration-200">
+              LedgeX Assistant uses your live data to provide personalized guidance.
             </p>
+            {chatError && (
+              <div className="flex justify-center mt-2 animate-fade-in-up">
+                <p className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-medium py-1.5 px-3 rounded-full flex items-center shadow-sm">
+                  <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
+                  {chatError}
+                </p>
+              </div>
+            )}
           </div>
+        </section>
+
+        {/* Closing Summary */}
+        <section className="text-center pt-8 pb-4 animate-fade-in-up" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
+           <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl mx-auto font-medium transition-colors duration-200">
+             Keep tracking your daily expenses and checking back here to stay on top of your financial health. 
+             Every small step brings you closer to your long-term goals!
+           </p>
         </section>
 
       </div>

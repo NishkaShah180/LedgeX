@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
-import { 
-  Plus, Edit2, Trash2, X, AlertCircle, Target, Wallet, TrendingDown 
-} from 'lucide-react';
+import { Plus, Edit2, Trash2, X, AlertCircle, Target, Wallet, TrendingDown } from 'lucide-react';
 import { getCategoryBadgeClass } from '../utils/colors';
+import PageHeader from '../components/PageHeader';
 
 export default function BudgetsPage() {
   const currentDate = new Date();
@@ -198,72 +197,71 @@ export default function BudgetsPage() {
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       
       {/* Header & Filters */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Budgets</h1>
-          <p className="text-slate-500 mt-1">Track and manage your spending limits</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium text-slate-700 w-full sm:w-auto"
+      <PageHeader
+        title="Budgets"
+        subtitle="Track and manage your spending limits"
+        action={
+          <>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium text-slate-700 dark:text-gray-200 w-full sm:w-auto transition-colors duration-200"
+              >
+                {monthNames.map((m, i) => (
+                  <option key={i+1} value={i+1}>{m}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium text-slate-700 dark:text-gray-200 w-24 transition-colors duration-200"
+                min="2000"
+                max="2100"
+              />
+            </div>
+            
+            <button
+              onClick={() => handleOpenModal()}
+              className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap"
             >
-              {monthNames.map((m, i) => (
-                <option key={i+1} value={i+1}>{m}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-sm font-medium text-slate-700 w-24"
-              min="2000"
-              max="2100"
-            />
-          </div>
-          
-          <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap"
-          >
-            <Plus className="w-5 h-5 mr-1" />
-            Add Budget
-          </button>
-        </div>
-      </div>
+              <Plus className="w-5 h-5 mr-1" />
+              Add Budget
+            </button>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex items-center space-x-4">
-          <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700 p-6 flex items-center space-x-4 transition-colors duration-200">
+          <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full transition-colors duration-200">
             <Target className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Total Budget</p>
-            <p className="text-2xl font-bold text-slate-900">{formatINR(summary.totalBudget)}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Total Budget</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{formatINR(summary.totalBudget)}</p>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex items-center space-x-4">
-          <div className="p-3 bg-red-100 text-red-600 rounded-full">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700 p-6 flex items-center space-x-4 transition-colors duration-200">
+          <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full transition-colors duration-200">
             <TrendingDown className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Total Spent</p>
-            <p className="text-2xl font-bold text-slate-900">{formatINR(summary.totalSpent)}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Total Spent</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{formatINR(summary.totalSpent)}</p>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex items-center space-x-4">
-          <div className="p-3 bg-emerald-100 text-emerald-600 rounded-full">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700 p-6 flex items-center space-x-4 transition-colors duration-200">
+          <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full transition-colors duration-200">
             <Wallet className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Remaining Budget</p>
-            <p className={`text-2xl font-bold ${summary.remainingBudget >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            <p className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Remaining Budget</p>
+            <p className={`text-2xl font-bold transition-colors duration-200 ${summary.remainingBudget >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
               {formatINR(summary.remainingBudget)}
             </p>
           </div>
@@ -274,21 +272,21 @@ export default function BudgetsPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
           <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500">Loading budgets...</p>
+          <p className="text-slate-500 dark:text-gray-400 transition-colors duration-200">Loading budgets...</p>
         </div>
       ) : displayBudgets.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 py-20 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700 py-20 text-center transition-colors duration-200">
           <div className="flex flex-col items-center justify-center max-w-sm mx-auto space-y-4">
-            <div className="p-4 bg-slate-50 rounded-full">
-              <Target className="w-12 h-12 text-slate-300" />
+            <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-full transition-colors duration-200">
+              <Target className="w-12 h-12 text-slate-300 dark:text-gray-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">No budgets for this period yet</h3>
-              <p className="text-slate-500 mt-1">Set up budgets to keep your spending on track for {monthNames[selectedMonth-1]} {selectedYear}.</p>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors duration-200">No budgets for this period yet</h3>
+              <p className="text-slate-500 dark:text-gray-400 mt-1 transition-colors duration-200">Set up budgets to keep your spending on track for {monthNames[selectedMonth-1]} {selectedYear}.</p>
             </div>
             <button
               onClick={() => handleOpenModal()}
-              className="mt-4 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-colors"
+              className="mt-4 px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
             >
               Create Budget
             </button>
@@ -297,27 +295,27 @@ export default function BudgetsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayBudgets.map((budget) => (
-            <div key={budget.id} className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 hover:shadow-md transition-shadow">
+            <div key={budget.id} className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-slate-100 dark:border-gray-700 p-5 hover:shadow-md transition-all duration-200">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 ${getCategoryBadgeClass(budget.categoryStr)}`}>
                     {budget.categoryStr}
                   </span>
-                  <h3 className="text-lg font-semibold text-slate-900">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors duration-200">
                     {formatINR(budget.limit)}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{monthNames[budget.month-1]} {budget.year}</p>
+                  <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5 transition-colors duration-200">{monthNames[budget.month-1]} {budget.year}</p>
                 </div>
                 <div className="flex space-x-1">
                   <button 
                     onClick={() => handleOpenModal(budget)}
-                    className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-md transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => handleOpenDelete(budget)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -326,13 +324,13 @@ export default function BudgetsPage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 font-medium">Spent: {formatINR(budget.spent)}</span>
-                  <span className={`font-semibold ${budget.remaining >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <span className="text-slate-600 dark:text-gray-400 font-medium transition-colors duration-200">Spent: {formatINR(budget.spent)}</span>
+                  <span className={`font-semibold transition-colors duration-200 ${budget.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                     {budget.remaining >= 0 ? 'Left: ' : 'Over: '}{formatINR(Math.abs(budget.remaining))}
                   </span>
                 </div>
                 
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="w-full bg-slate-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden transition-colors duration-200">
                   <div 
                     className={`h-2.5 rounded-full transition-all duration-500 ${
                       budget.status === 'OVER_BUDGET' ? 'bg-red-500' : 
@@ -344,11 +342,11 @@ export default function BudgetsPage() {
                 </div>
                 
                 <div className="flex justify-between items-center pt-1">
-                  <span className="text-xs font-medium text-slate-500">{budget.percentage.toFixed(0)}% Used</span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    budget.status === 'OVER_BUDGET' ? 'bg-red-50 text-red-600 border border-red-100' : 
-                    budget.status === 'WARNING' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
-                    'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  <span className="text-xs font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">{budget.percentage.toFixed(0)}% Used</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full transition-colors duration-200 ${
+                    budget.status === 'OVER_BUDGET' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800/50' : 
+                    budget.status === 'WARNING' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/50' : 
+                    'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50'
                   }`}>
                     {budget.status === 'OVER_BUDGET' ? 'Over Budget' : budget.status === 'WARNING' ? 'Warning' : 'On Track'}
                   </span>
@@ -362,15 +360,15 @@ export default function BudgetsPage() {
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 mx-4 max-h-[90vh] overflow-y-auto border border-slate-100 dark:border-gray-800 transition-colors">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-gray-800 transition-colors">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors">
                 {currentBudget ? 'Edit Budget' : 'Add Budget'}
               </h2>
               <button 
                 onClick={handleCloseModal}
                 disabled={isSaving}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
+                className="p-2 text-slate-400 dark:text-gray-400 hover:text-slate-600 dark:hover:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full transition-colors disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -378,27 +376,27 @@ export default function BudgetsPage() {
             
             <form onSubmit={handleSave} className="p-6 space-y-4">
               {formError && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-center">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm flex items-center transition-colors">
                   <AlertCircle className="w-4 h-4 mr-2" />
                   {formError}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Category</label>
                 <input
                   type="text"
                   required
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g. Groceries, Entertainment"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
                   disabled={isSaving}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Monthly Limit (₹)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Monthly Limit (₹)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -407,19 +405,19 @@ export default function BudgetsPage() {
                   value={formData.monthlyLimit}
                   onChange={(e) => setFormData({ ...formData, monthlyLimit: e.target.value })}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
                   disabled={isSaving}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Month</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Month</label>
                   <select
                     required
                     value={formData.month}
                     onChange={(e) => setFormData({ ...formData, month: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
                     disabled={isSaving}
                   >
                     {monthNames.map((m, i) => (
@@ -428,7 +426,7 @@ export default function BudgetsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Year</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Year</label>
                   <input
                     type="number"
                     required
@@ -436,7 +434,7 @@ export default function BudgetsPage() {
                     max="2100"
                     value={formData.year}
                     onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
                     disabled={isSaving}
                   />
                 </div>
@@ -447,7 +445,7 @@ export default function BudgetsPage() {
                   type="button"
                   onClick={handleCloseModal}
                   disabled={isSaving}
-                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -473,19 +471,19 @@ export default function BudgetsPage() {
       {/* Delete Confirmation Modal */}
       {isDeleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in-95 duration-200 mx-4">
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in-95 duration-200 mx-4 border border-slate-100 dark:border-gray-800 transition-colors">
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Budget?</h3>
-            <p className="text-slate-500 text-sm mb-6">
-              Are you sure you want to delete the budget for <span className="font-medium text-slate-700">"{String(currentBudget?.category || '')}"</span>? This action cannot be undone.
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 transition-colors">Delete Budget?</h3>
+            <p className="text-slate-500 dark:text-gray-400 text-sm mb-6 transition-colors">
+              Are you sure you want to delete the budget for <span className="font-medium text-slate-700 dark:text-gray-300">"{String(currentBudget?.category || '')}"</span>? This action cannot be undone.
             </p>
             <div className="flex flex-col-reverse sm:flex-row justify-center gap-3 sm:space-x-3 sm:gap-0">
               <button
                 onClick={() => setIsDeleteDialogOpen(false)}
                 disabled={isSaving}
-                className="w-full sm:flex-1 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                className="w-full sm:flex-1 px-4 py-2 text-sm font-medium text-slate-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

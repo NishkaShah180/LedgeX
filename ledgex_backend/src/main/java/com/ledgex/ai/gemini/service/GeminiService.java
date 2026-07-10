@@ -19,6 +19,7 @@ import com.ledgex.analytics.dto.SubscriptionSummaryAnalyticsResponse;
 import com.ledgex.analytics.service.AnalyticsService;
 import com.ledgex.auth.entity.User;
 import com.ledgex.auth.repository.UserRepository;
+import com.ledgex.common.exception.BadRequestException;
 import com.ledgex.common.exception.ResourceNotFoundException;
 import com.ledgex.savings.entity.SavingsGoal;
 import com.ledgex.savings.repository.SavingsGoalRepository;
@@ -39,9 +40,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.web.client.RestClientResponseException;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class GeminiService {
 
     private static final String RESPONSE_SCHEMA = """
@@ -65,7 +67,25 @@ public class GeminiService {
     private final SubscriptionRepository subscriptionRepository;
     private final GeminiProperties geminiProperties;
     private final ObjectMapper objectMapper;
-    private final RestClient.Builder restClientBuilder;
+    private final RestClient restClient;
+
+    public GeminiService(AnalyticsService analyticsService,
+                         AIInsightsService aiInsightsService,
+                         UserRepository userRepository,
+                         SavingsGoalRepository savingsGoalRepository,
+                         SubscriptionRepository subscriptionRepository,
+                         GeminiProperties geminiProperties,
+                         ObjectMapper objectMapper,
+                         RestClient.Builder restClientBuilder) {
+        this.analyticsService = analyticsService;
+        this.aiInsightsService = aiInsightsService;
+        this.userRepository = userRepository;
+        this.savingsGoalRepository = savingsGoalRepository;
+        this.subscriptionRepository = subscriptionRepository;
+        this.geminiProperties = geminiProperties;
+        this.objectMapper = objectMapper;
+        this.restClient = restClientBuilder.baseUrl(geminiProperties.getBaseUrl()).build();
+    }
 
     @Transactional(readOnly = true)
     public GeminiResponseDTO getGeminiInsights(String userEmail, Integer month, Integer year) {
@@ -275,10 +295,6 @@ public class GeminiService {
                 "generationConfig", generationConfig
         );
 
-        RestClient restClient = restClientBuilder
-                .baseUrl(geminiProperties.getBaseUrl())
-                .build();
-
         GeminiApiResponse apiResponse = restClient.post()
                 .uri("/models/{model}:generateContent?key={apiKey}",
                         geminiProperties.getModel(),
@@ -288,16 +304,16 @@ public class GeminiService {
                 .retrieve()
                 .body(GeminiApiResponse.class);
 
-        if (apiResponse == null
-                || apiResponse.candidates == null
-                || apiResponse.candidates.isEmpty()
-                || apiResponse.candidates.getFirst().content == null
-                || apiResponse.candidates.getFirst().content.parts == null
-                || apiResponse.candidates.getFirst().content.parts.isEmpty()) {
-            throw new RestClientException("Gemini API returned an empty response");
+        if (apiResponse == null || apiResponse.candidates == null || apiResponse.candidates.isEmpty()) {
+            throw new IllegalArgumentException("Gemini API returned an empty response");
+        }
+        
+        GeminiApiResponse.Candidate firstCandidate = apiResponse.candidates.getFirst();
+        if (firstCandidate.content == null || firstCandidate.content.parts == null || firstCandidate.content.parts.isEmpty()) {
+            throw new IllegalArgumentException("Gemini API refused to answer (Reason: " + firstCandidate.finishReason + ")");
         }
 
-        String text = apiResponse.candidates.getFirst().content.parts.getFirst().text;
+        String text = firstCandidate.content.parts.getFirst().text;
         if (text == null || text.isBlank()) {
             throw new RestClientException("Gemini API returned empty text content");
         }
@@ -315,9 +331,15 @@ public class GeminiService {
             String prompt = buildChatPrompt(data, userEmail, chatRequest.getPrompt());
             String responseText = callGeminiChatApi(prompt);
             return new ChatResponseDTO(responseText);
+        } catch (RestClientResponseException e) {
+            log.error("Gemini API HTTP error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw new BadRequestException("I'm having trouble connecting to the AI service right now. Please try again later.");
+        } catch (IllegalArgumentException e) {
+            log.warn("Gemini API refused to answer: {}", e.getMessage());
+            throw new BadRequestException(e.getMessage());
         } catch (Exception exception) {
-            log.error("Gemini Chat API call failed", exception);
-            return new ChatResponseDTO("I'm having trouble analyzing your data right now. Please try again later.");
+            log.error("Gemini Chat API call failed unexpectedly", exception);
+            throw new BadRequestException("An unexpected error occurred while analyzing your data. Please try again later.");
         }
     }
 
@@ -367,6 +389,7 @@ public class GeminiService {
                 Do not use complex jargon. Avoid overwhelming them with numbers, but do reference their specific amounts where it makes your advice more actionable.
                 Keep your response concise, ideally 3-5 sentences.
                 Do NOT output JSON. Output plain text (with basic markdown like bold or bullets if needed).
+                If the user asks a question that is entirely unrelated to finance, budgeting, savings, or investments, politely decline to answer and remind them that you are your personal finance assistant. Do not attempt to answer non-financial questions.
                 """.formatted(
                 user.getFirstName(),
                 healthScore.getScore(),
@@ -394,10 +417,6 @@ public class GeminiService {
                 "generationConfig", generationConfig
         );
 
-        RestClient restClient = restClientBuilder
-                .baseUrl(geminiProperties.getBaseUrl())
-                .build();
-
         GeminiApiResponse apiResponse = restClient.post()
                 .uri("/models/{model}:generateContent?key={apiKey}",
                         geminiProperties.getModel(),
@@ -407,18 +426,23 @@ public class GeminiService {
                 .retrieve()
                 .body(GeminiApiResponse.class);
 
-        if (apiResponse == null
-                || apiResponse.candidates == null
-                || apiResponse.candidates.isEmpty()
-                || apiResponse.candidates.getFirst().content == null
-                || apiResponse.candidates.getFirst().content.parts == null
-                || apiResponse.candidates.getFirst().content.parts.isEmpty()) {
-            throw new org.springframework.web.client.RestClientException("Gemini API returned an empty response");
+        if (apiResponse == null || apiResponse.candidates == null || apiResponse.candidates.isEmpty()) {
+            throw new IllegalArgumentException("I didn't receive a valid response from the AI. Please try rephrasing your question.");
         }
 
-        String text = apiResponse.candidates.getFirst().content.parts.getFirst().text;
+        GeminiApiResponse.Candidate firstCandidate = apiResponse.candidates.getFirst();
+        if (firstCandidate.content == null || firstCandidate.content.parts == null || firstCandidate.content.parts.isEmpty()) {
+            String reason = firstCandidate.finishReason;
+            if ("SAFETY".equalsIgnoreCase(reason)) {
+                throw new IllegalArgumentException("I cannot answer this question as it violates safety policies. Please ask a finance-related question.");
+            } else {
+                throw new IllegalArgumentException("I'm unable to process this request right now (Reason: " + reason + "). Please try rephrasing.");
+            }
+        }
+
+        String text = firstCandidate.content.parts.getFirst().text;
         if (text == null || text.isBlank()) {
-            throw new org.springframework.web.client.RestClientException("Gemini API returned empty text content");
+            throw new IllegalArgumentException("I didn't receive any text from the AI.");
         }
 
         return text;
@@ -540,6 +564,7 @@ public class GeminiService {
         @JsonIgnoreProperties(ignoreUnknown = true)
         private static class Candidate {
             public Content content;
+            public String finishReason;
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)

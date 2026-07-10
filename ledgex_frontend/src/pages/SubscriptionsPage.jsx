@@ -7,6 +7,7 @@ import {
   Wallet, IndianRupee
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PageHeader from '../components/PageHeader';
 
 export default function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -144,21 +145,21 @@ export default function SubscriptionsPage() {
 
   const getCategoryColor = (category) => {
     const cat = (category || '').toLowerCase();
-    if (cat.includes('entertainment') || cat.includes('music') || cat.includes('movie')) return 'bg-fuchsia-100 border-fuchsia-200';
-    if (cat.includes('health') || cat.includes('gym') || cat.includes('fitness')) return 'bg-emerald-100 border-emerald-200';
-    if (cat.includes('software') || cat.includes('tech') || cat.includes('app')) return 'bg-blue-100 border-blue-200';
-    if (cat.includes('shopping') || cat.includes('ecommerce')) return 'bg-amber-100 border-amber-200';
-    if (cat.includes('food') || cat.includes('dining') || cat.includes('grocery')) return 'bg-orange-100 border-orange-200';
-    if (cat.includes('news') || cat.includes('read') || cat.includes('book')) return 'bg-cyan-100 border-cyan-200';
-    if (cat.includes('utility') || cat.includes('bill') || cat.includes('internet')) return 'bg-indigo-100 border-indigo-200';
+    if (cat.includes('entertainment') || cat.includes('music') || cat.includes('movie')) return 'bg-fuchsia-100 border-fuchsia-200 dark:bg-fuchsia-900/30 dark:border-fuchsia-800';
+    if (cat.includes('health') || cat.includes('gym') || cat.includes('fitness')) return 'bg-emerald-100 border-emerald-200 dark:bg-emerald-900/30 dark:border-emerald-800';
+    if (cat.includes('software') || cat.includes('tech') || cat.includes('app')) return 'bg-blue-100 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800';
+    if (cat.includes('shopping') || cat.includes('ecommerce')) return 'bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800';
+    if (cat.includes('food') || cat.includes('dining') || cat.includes('grocery')) return 'bg-orange-100 border-orange-200 dark:bg-orange-900/30 dark:border-orange-800';
+    if (cat.includes('news') || cat.includes('read') || cat.includes('book')) return 'bg-cyan-100 border-cyan-200 dark:bg-cyan-900/30 dark:border-cyan-800';
+    if (cat.includes('utility') || cat.includes('bill') || cat.includes('internet')) return 'bg-indigo-100 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800';
     
     // Hash fallback
     const colors = [
-      'bg-rose-100 border-rose-200',
-      'bg-violet-100 border-violet-200',
-      'bg-teal-100 border-teal-200',
-      'bg-lime-100 border-lime-200',
-      'bg-sky-100 border-sky-200'
+      'bg-rose-100 border-rose-200 dark:bg-rose-900/30 dark:border-rose-800',
+      'bg-violet-100 border-violet-200 dark:bg-violet-900/30 dark:border-violet-800',
+      'bg-teal-100 border-teal-200 dark:bg-teal-900/30 dark:border-teal-800',
+      'bg-lime-100 border-lime-200 dark:bg-lime-900/30 dark:border-lime-800',
+      'bg-sky-100 border-sky-200 dark:bg-sky-900/30 dark:border-sky-800'
     ];
     let hash = 0;
     for (let i = 0; i < cat.length; i++) {
@@ -251,73 +252,73 @@ export default function SubscriptionsPage() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Subscriptions</h1>
-          <p className="text-slate-500 mt-1">Manage your recurring payments and services.</p>
-        </div>
-        <button
-          onClick={handleOpenAdd}
-          className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 w-full sm:w-auto"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Subscription
-        </button>
-      </div>
+      <PageHeader
+        title="Subscriptions"
+        subtitle="Manage your recurring payments and services."
+        action={
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 w-full sm:w-auto"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Subscription
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col transition-colors duration-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Active Subscriptions</h3>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Active Subscriptions</h3>
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg transition-colors duration-200">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{summary?.activeSubscriptions || 0}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{summary?.activeSubscriptions || 0}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col transition-colors duration-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Monthly Cost</h3>
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Monthly Cost</h3>
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors duration-200">
               <CreditCard className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary?.monthlyEstimatedCost || 0)}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{formatCurrency(summary?.monthlyEstimatedCost || 0)}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col transition-colors duration-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Yearly Cost</h3>
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Yearly Cost</h3>
+            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg transition-colors duration-200">
               <Wallet className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary?.yearlyEstimatedCost || 0)}</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{formatCurrency(summary?.yearlyEstimatedCost || 0)}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col transition-colors duration-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-slate-500">Upcoming Renewals</h3>
-            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-gray-400 transition-colors duration-200">Upcoming Renewals</h3>
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg transition-colors duration-200">
               <CalendarDays className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{upcomingRenewalsCount}</p>
-          <p className="text-xs text-slate-500 mt-1">Next 30 days</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{upcomingRenewalsCount}</p>
+          <p className="text-xs text-slate-500 dark:text-gray-400 mt-1 transition-colors duration-200">Next 30 days</p>
         </div>
       </div>
 
       {/* Filters/Sorting */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col lg:flex-row gap-4 items-center">
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 flex flex-col lg:flex-row gap-4 items-center transition-colors duration-200">
         <div className="relative w-full lg:w-1/3">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="w-5 h-5 text-slate-400" />
+            <Search className="w-5 h-5 text-slate-400 dark:text-gray-500" />
           </div>
           <input
             type="text"
             placeholder="Search subscriptions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors duration-200"
           />
         </div>
         
@@ -325,7 +326,7 @@ export default function SubscriptionsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+            className="w-full sm:w-auto bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-colors duration-200"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>
@@ -335,7 +336,7 @@ export default function SubscriptionsPage() {
           <select
             value={filterCycle}
             onChange={(e) => setFilterCycle(e.target.value)}
-            className="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+            className="w-full sm:w-auto bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-colors duration-200"
           >
             <option value="ALL">All Cycles</option>
             <option value="MONTHLY">Monthly</option>
@@ -347,7 +348,7 @@ export default function SubscriptionsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+            className="w-full sm:w-auto bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-colors duration-200"
           >
             <option value="next_renewal">Next Renewal First</option>
             <option value="cost_desc">Cost (High to Low)</option>
@@ -359,12 +360,12 @@ export default function SubscriptionsPage() {
 
       {/* Subscription Cards Grid */}
       {filteredAndSortedSubs.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 py-16 px-6 text-center">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Repeat className="w-8 h-8 text-slate-400" />
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 py-16 px-6 text-center transition-colors duration-200">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-200">
+            <Repeat className="w-8 h-8 text-slate-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">No Subscriptions Found</h3>
-          <p className="text-slate-500 max-w-sm mx-auto mb-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 transition-colors duration-200">No Subscriptions Found</h3>
+          <p className="text-slate-500 dark:text-gray-400 max-w-sm mx-auto mb-6 transition-colors duration-200">
             {subscriptions.length === 0 
               ? "Keep track of your recurring services and never miss a payment." 
               : "No subscriptions match your current filters."}
@@ -391,12 +392,12 @@ export default function SubscriptionsPage() {
               <div key={sub.id} className={`${cardColorClass} rounded-2xl shadow-sm border p-6 flex flex-col ${!sub.isActive ? 'opacity-75 grayscale-[0.5]' : ''} hover:shadow-md transition-shadow`}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="pr-4 flex-1">
-                    <h3 className="text-lg font-bold text-slate-900 break-words">{String(sub.name)}</h3>
-                    <p className="text-sm text-slate-500 mt-1">{String(sub.category)}</p>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white break-words transition-colors duration-200">{String(sub.name)}</h3>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 transition-colors duration-200">{String(sub.category)}</p>
                   </div>
                   {/* Status Badge */}
                   <div className="flex flex-col items-end gap-2 shrink-0">
-                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1 ${sub.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full flex items-center gap-1 transition-colors duration-200 ${sub.isActive ? 'bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300'}`}>
                       {sub.isActive ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
                       {sub.isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -405,42 +406,42 @@ export default function SubscriptionsPage() {
 
                 <div className="mt-2 mb-6">
                   <div className="flex items-end gap-2">
-                    <p className="text-3xl font-bold text-slate-900">{formatCurrency(sub.amount)}</p>
-                    <p className="text-sm text-slate-500 mb-1 font-medium">/{sub.billingCycle.toLowerCase()}</p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white transition-colors duration-200">{formatCurrency(sub.amount)}</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-1 font-medium transition-colors duration-200">/{sub.billingCycle.toLowerCase()}</p>
                   </div>
                 </div>
 
                 {/* Billing Info */}
                 <div className="grid grid-cols-1 gap-3 text-sm mb-6 flex-grow">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 border border-white/40">
-                    <div className="flex items-center text-slate-600">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-black/20 border border-white/40 dark:border-white/10 transition-colors duration-200">
+                    <div className="flex items-center text-slate-700 dark:text-slate-300 transition-colors duration-200">
                       <Calendar className="w-4 h-4 mr-2" />
                       <span>Next Billing</span>
                     </div>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-white transition-colors duration-200">
                       {new Date(sub.nextBillingDate).toLocaleDateString()}
                     </span>
                   </div>
                   
                   {sub.isActive && (
-                    <div className={`p-2.5 rounded-lg text-center font-medium text-xs ${badgeStyle}`}>
+                    <div className={`p-2.5 rounded-lg text-center font-medium text-xs dark:bg-opacity-20 dark:border-opacity-30 ${badgeStyle}`}>
                       {badgeText}
                     </div>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-900/5">
+                <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-900/10 dark:border-white/10 transition-colors duration-200">
                   <button
                     onClick={() => handleOpenEdit(sub)}
-                    className="flex-1 py-2 bg-white/60 text-slate-700 hover:bg-white hover:text-emerald-700 rounded-lg font-medium transition-colors border border-white/40 hover:border-emerald-200 flex items-center justify-center gap-2"
+                    className="flex-1 py-2 bg-white/60 dark:bg-white/10 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-white/20 hover:text-emerald-700 dark:hover:text-emerald-400 rounded-lg font-medium transition-colors border border-white/40 dark:border-white/10 hover:border-emerald-200 dark:hover:border-emerald-500/30 flex items-center justify-center gap-2"
                   >
                     <Edit2 className="w-4 h-4" />
                     Edit
                   </button>
                   <button
                     onClick={() => handleOpenDelete(sub)}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-800/50"
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -455,31 +456,31 @@ export default function SubscriptionsPage() {
       {/* Add/Edit Modal */}
       {isAddEditModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-lg font-bold text-slate-900">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md overflow-hidden shadow-xl mx-4 max-h-[90vh] overflow-y-auto border border-slate-100 dark:border-gray-800 transition-colors">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-gray-800 flex justify-between items-center bg-slate-50/50 dark:bg-gray-800/50 transition-colors">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">
                 {currentSubscription ? 'Edit Subscription' : 'Add Subscription'}
               </h3>
-              <button onClick={() => setIsAddEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
+              <button onClick={() => setIsAddEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
             <form onSubmit={handleSaveSubscription} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Service Name</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5 transition-colors">Service Name</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors"
                   placeholder="e.g. Netflix, Spotify"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Cost (₹)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5 transition-colors">Cost (₹)</label>
                   <input
                     type="number"
                     required
@@ -487,16 +488,16 @@ export default function SubscriptionsPage() {
                     step="0.01"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors"
                     placeholder="199"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Billing Cycle</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5 transition-colors">Billing Cycle</label>
                   <select
                     value={formData.billingCycle}
                     onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors"
                   >
                     <option value="MONTHLY">Monthly</option>
                     <option value="YEARLY">Yearly</option>
@@ -507,25 +508,25 @@ export default function SubscriptionsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5 transition-colors">Category</label>
                 <input
                   type="text"
                   required
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors"
                   placeholder="e.g. Entertainment, Utilities"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Next Billing Date</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5 transition-colors">Next Billing Date</label>
                 <input
                   type="date"
                   required
                   value={formData.nextBillingDate}
                   onChange={(e) => setFormData({ ...formData, nextBillingDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white transition-colors"
                 />
               </div>
 
@@ -538,27 +539,27 @@ export default function SubscriptionsPage() {
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${formData.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${formData.isActive ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-gray-600'}`}></div>
                     <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.isActive ? 'transform translate-x-4' : ''}`}></div>
                   </div>
-                  <div className="ml-3 text-sm font-medium text-slate-700">
+                  <div className="ml-3 text-sm font-medium text-slate-700 dark:text-gray-300 transition-colors">
                     Subscription is Active
                   </div>
                 </label>
               </div>
 
-              <div className="pt-6 flex flex-col-reverse sm:flex-row gap-3 border-t border-slate-100">
+              <div className="pt-6 flex flex-col-reverse sm:flex-row gap-3 border-t border-slate-100 dark:border-gray-800 transition-colors">
                 <button
                   type="button"
                   onClick={() => setIsAddEditModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-slate-200 dark:hover:bg-gray-700 font-medium transition-colors border border-transparent dark:border-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                  className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors disabled:opacity-50 flex items-center justify-center shadow-sm"
                 >
                   {actionLoading ? 'Saving...' : 'Save Subscription'}
                 </button>
@@ -571,25 +572,25 @@ export default function SubscriptionsPage() {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && currentSubscription && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center shadow-xl mx-4">
-            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-sm p-6 text-center shadow-xl mx-4 border border-slate-100 dark:border-gray-800 transition-colors">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
               <AlertCircle className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Subscription?</h3>
-            <p className="text-slate-500 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-slate-800">{String(currentSubscription.name)}</span>? This action cannot be undone.
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 transition-colors">Delete Subscription?</h3>
+            <p className="text-slate-500 dark:text-gray-400 mb-6 transition-colors">
+              Are you sure you want to delete <span className="font-semibold text-slate-800 dark:text-gray-200">{String(currentSubscription.name)}</span>? This action cannot be undone.
             </p>
             <div className="flex flex-col-reverse sm:flex-row gap-3">
               <button
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium transition-colors"
+                className="flex-1 px-4 py-2 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-slate-200 dark:hover:bg-gray-700 font-medium transition-colors border border-transparent dark:border-gray-700"
                 disabled={actionLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 flex items-center justify-center shadow-sm"
                 disabled={actionLoading}
               >
                 {actionLoading ? 'Deleting...' : 'Delete'}
