@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { getCategoryHexColor } from '../utils/colors';
 import PageHeader from '../components/PageHeader';
+import { useTheme } from '../context/ThemeContext';
 
 const TIME_RANGES = {
   THIS_MONTH: { label: 'This Month', months: 1, offset: 0 },
@@ -21,6 +22,7 @@ const TIME_RANGES = {
 };
 
 export default function AnalyticsPage() {
+  const { theme } = useTheme();
   const [timeRange, setTimeRange] = useState('LAST_3_MONTHS');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -427,10 +429,10 @@ export default function AnalyticsPage() {
                       <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-slate-100 dark:text-gray-700/50" />
-                  <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600 }} dy={10} className="fill-slate-500 dark:fill-gray-400" />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600 }} tickFormatter={(val) => `₹${val >= 1000 ? (val/1000).toFixed(0)+'k' : val}`} className="fill-slate-500 dark:fill-gray-400" />
-                  <RechartsTooltip cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }} formatter={(value) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.95)', color: '#0f172a' }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#374151' : '#f1f5f9'} />
+                  <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: theme === 'dark' ? '#9ca3af' : '#64748b', fontSize: 12, fontWeight: 600 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: theme === 'dark' ? '#9ca3af' : '#64748b', fontSize: 12, fontWeight: 600 }} tickFormatter={(val) => `₹${val >= 1000 ? (val/1000).toFixed(0)+'k' : val}`} />
+                  <RechartsTooltip cursor={{ stroke: theme === 'dark' ? '#4b5563' : '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }} formatter={(value) => formatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', backgroundColor: theme === 'dark' ? '#1f2937' : 'rgba(255, 255, 255, 0.95)', color: theme === 'dark' ? '#f3f4f6' : '#0f172a' }} itemStyle={{ color: theme === 'dark' ? '#f3f4f6' : '#0f172a' }} />
                   <Area type="monotone" dataKey="Income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
                   <Area type="monotone" dataKey="Expense" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
                 </AreaChart>

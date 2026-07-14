@@ -1,229 +1,173 @@
-# LedgeX 💰
+<div align="center">
+  <img src="ledgex_frontend/public/logo.png" alt="LedgeX Logo" width="150"/>
+  <h1>LedgeX</h1>
+  <p><strong>Smart Personal Finance & Financial Wellness Platform</strong></p>
+  <img src="ledgex_frontend/public/hero.png" alt="LedgeX Hero" width="800"/>
+</div>
 
-**Smart Personal Finance & Financial Wellness Platform**
+## 📖 About
 
-LedgeX (project codename: Spendora) is a full-stack fintech application that helps users manage income, expenses, budgets, subscriptions, and savings goals — all in one place, enhanced with AI-driven financial insights.
+LedgeX is a full-stack personal finance platform that helps users manage expenses, budgets, subscriptions, savings goals, financial analytics, and AI-powered financial insights through a modern, responsive dashboard. It empowers users to take control of their financial health with intuitive visualizations and personalized, intelligent advice.
 
----
+## ✨ Features
 
-## 📌 Problem Statement
+### Authentication
+- **JWT Authentication**: Secure stateless session management.
+- **Secure Login & Registration**: Protected routes and encrypted credentials.
 
-People struggle to manage personal finances effectively due to unorganized expense tracking, lack of financial awareness, and poor spending analysis. Most existing finance apps only record transactions — they don't help users *understand* their spending behavior, catch budget overruns, manage recurring subscriptions, or plan savings goals intelligently.
-
-LedgeX solves this by combining transaction tracking, budgeting, savings goals, subscription management, analytics, and **AI-powered financial guidance** into a single connected platform.
-
----
-
-## 🎯 Core Features
-
-### Financial Management
-- Income & expense tracking
-- Category-wise transaction management
-- Monthly budget planning with utilization tracking
-- Goal-based savings tracking with contribution history
-- Subscription & recurring payment management
-
-### Analytics & Reporting
-- Monthly financial overview (income, expense, net balance, savings rate)
-- Spending breakdown by category
-- Monthly trend analysis
-- Top expenses
-- Budget vs actual comparison
-- Composite **Financial Health Score** (0–100)
-
-### AI-Powered Insights
-- Rule-based financial insights (warnings, recommendations, achievements)
-- **Gemini AI integration** for personalized, conversational financial advice
-- Friendly, jargon-free summaries referencing the user's real numbers
-- Savings advice, budget advice, and risk detection
-
-### Platform Features
-- Secure JWT-based authentication
-- RESTful API architecture
-- Swagger/OpenAPI documentation
-- Global exception handling with consistent API response format
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | React 19 (Vite), Tailwind CSS v4, React Router DOM v7 |
-| Backend | Java 21, Spring Boot 3, Maven |
-| Database | MySQL |
-| Authentication | Spring Security + JWT |
-| AI Services | Google Gemini API |
-| HTTP Client (Frontend) | Axios |
-| Data Visualization | Recharts |
-| Icons | Lucide React |
-| API Testing | Postman |
-| Dev Tools | Cursor AI, VS Code |
-
----
-
-## 🏗️ System Architecture
-
-LedgeX follows a **layered architecture** on the backend and a **component-based architecture** on the frontend.
-
-```
-┌─────────────────────────────────────────┐
-│              React Frontend              │
-│   (Pages → Components → Context → API)   │
-└───────────────────┬───────────────────────┘
-                     │ REST API (JWT Bearer)
-┌───────────────────▼───────────────────────┐
-│           Spring Boot Backend             │
-│                                            │
-│  Controller → Service → Repository → DB   │
-│                                            │
-│  Cross-cutting: Security (JWT), DTOs,     │
-│  Exception Handling, Validation           │
-└───────────────────┬───────────────────────┘
-                     │
-              ┌──────▼──────┐       ┌─────────────┐
-              │   MySQL DB   │      │  Gemini AI   │
-              └──────────────┘      └─────────────┘
-```
-
----
-
-## 📂 Backend Structure
-
-```
-com.ledgex/
-├── config/              → Security & app configuration
-├── controller/          → REST API endpoints
-├── dto/                 → Request/response data shapes
-├── entity/              → JPA entities (DB tables)
-├── exception/           → Global exception handling
-├── repository/          → Spring Data JPA repositories
-├── security/            → JWT filters & utilities
-├── service/             → Business logic
-│
-├── analytics/           → Financial analytics & health score module
-├── ai/                  → Rule-based AI Insights module
-│   └── gemini/           → Gemini AI integration module
-├── subscription/        → Subscription management module
-```
-
-### Backend Modules Implemented
-
-| Module | Description |
-|---|---|
-| **Auth** | Register, login, JWT-based authentication |
-| **Transactions** | CRUD for income & expense entries |
-| **Budgets** | Monthly category budgets + dynamic utilization tracking |
-| **Savings Goals** | Goal creation, contributions, auto-completion, progress tracking |
-| **Subscriptions** | Recurring payment tracking, cost normalization (monthly/yearly), upcoming renewals |
-| **Analytics** | Overview, spending by category, monthly trends, top expenses, budget vs actual, financial health score |
-| **AI Insights** | Rule-based warnings, recommendations, and achievements |
-| **Gemini AI** | Real AI-generated, personalized financial summaries and advice |
-
----
-
-## 📂 Frontend Structure
-
-```
-src/
-├── api/
-│   └── axios.js          → Axios instance with JWT auto-attach
-├── context/
-│   └── AuthContext.jsx   → Auth state (token, user, login, logout)
-├── components/
-│   ├── ProtectedRoute.jsx
-│   └── SidebarLayout.jsx
-├── pages/
-│   ├── LoginPage.jsx
-│   ├── RegisterPage.jsx
-│   ├── Dashboard.jsx
-│   ├── TransactionsPage.jsx
-│   ├── BudgetsPage.jsx
-│   ├── GoalsPage.jsx
-│   ├── SubscriptionsPage.jsx
-│   ├── AnalyticsPage.jsx
-│   └── AiInsightsPage.jsx
-└── main.jsx               → Routes & app entry point
-```
-
----
-
-## 🔑 API Endpoints Overview
-
-### Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/auth/register` | Create new user account |
-| POST | `/api/v1/auth/login` | Authenticate & receive JWT |
-
-### Transactions
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/v1/transactions` | Create transaction |
-| GET | `/api/v1/transactions` | List transactions |
-| GET / PUT / DELETE | `/api/v1/transactions/{id}` | Manage single transaction |
-
-### Budgets
-| Method | Endpoint | Description |
-|---|---|---|
-| POST / GET / PUT / DELETE | `/api/v1/budgets` | Budget CRUD |
-| GET | `/api/v1/budgets/utilization` | Category-wise spend vs limit |
-
-### Savings Goals
-| Method | Endpoint | Description |
-|---|---|---|
-| POST / GET / PUT / DELETE | `/api/v1/savings-goals` | Goal CRUD |
-| POST | `/api/v1/savings-goals/{id}/contribute` | Add contribution |
-| GET | `/api/v1/savings-goals/summary` | Aggregated goal stats |
-
-### Subscriptions
-| Method | Endpoint | Description |
-|---|---|---|
-| POST / GET / PUT / DELETE | `/api/v1/subscriptions` | Subscription CRUD |
-| GET | `/api/v1/subscriptions/active` | Active subscriptions only |
-| GET | `/api/v1/subscriptions/upcoming?days=N` | Renewals due soon |
-| GET | `/api/v1/subscriptions/summary` | Monthly/yearly cost estimate |
+### Finance Management
+- **Transactions**: Track, categorize, and analyze daily spending and income.
+- **Budgets**: Set and monitor monthly spending limits across customizable categories.
+- **Savings Goals**: Plan for the future with progress tracking for short and long-term goals.
+- **Subscriptions**: Manage recurring payments, identify inactive subscriptions, and view billing cycles.
 
 ### Analytics
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/analytics/overview` | Monthly income/expense/balance |
-| GET | `/api/v1/analytics/spending-by-category` | Category breakdown |
-| GET | `/api/v1/analytics/monthly-trend` | 12-month trend |
-| GET | `/api/v1/analytics/top-expenses` | Largest expenses |
-| GET | `/api/v1/analytics/budget-vs-actual` | Budget comparison |
-| GET | `/api/v1/analytics/savings-summary` | Goals overview |
-| GET | `/api/v1/analytics/subscription-summary` | Subscriptions overview |
-| GET | `/api/v1/analytics/financial-health-score` | Composite 0–100 score |
+- **Trends**: Visualize financial growth and spending habits over time.
+- **Spending & Budget Performance**: Compare actual spending against set budget thresholds.
+- **Comparisons**: Month-over-month and category-by-category comparative analysis.
 
-### AI
+### AI Integration
+- **Financial Coach**: A personalized, conversational AI assistant that understands your data.
+- **Personalized Insights**: Auto-generated alerts, warnings, and tips based on your spending behavior.
+- **Conversational Assistant**: Ask complex financial questions and get context-aware answers.
+
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](ledgex_frontend/public/dashboard.png)
+
+### Transactions
+![Transactions](ledgex_frontend/public/transactions.png)
+
+### Analytics
+![Analytics](ledgex_frontend/public/analytics.png)
+
+### AI Insights & Coach
+![AI Insights](ledgex_frontend/public/ai_insights.png)
+
+## 🛠️ Tech Stack
+
+**Frontend**
+- React
+- TailwindCSS
+- Axios
+- Recharts
+- Lucide Icons
+- Vite
+
+**Backend**
+- Java Spring Boot
+- Spring Security
+- JWT (JSON Web Tokens)
+- JPA / Hibernate
+- Maven
+
+**Database**
+- MySQL
+
+**AI**
+- Google Gemini API
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    Client[React Frontend] -->|HTTP / REST| Axios[Axios API Client]
+    Axios -->|JSON over HTTP| Controller[Spring Boot Controllers]
+    
+    subgraph Backend [Spring Boot Application]
+        Controller -->|Validate & Route| Security[Spring Security / JWT Filter]
+        Security -->|Authorized| Service[Service Layer]
+        Service -->|Business Logic| Repository[Spring Data JPA Repositories]
+    end
+    
+    Repository -->|Hibernate / SQL| DB[(MySQL Database)]
+    Service -.->|API Calls| AI[Google Gemini API]
+    
+    classDef frontend fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;
+    classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff;
+    classDef database fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
+    classDef external fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff;
+    
+    class Client,Axios frontend;
+    class Controller,Security,Service,Repository backend;
+    class DB database;
+    class AI external;
+```
+
+## 📁 Folder Structure
+
+```
+ledgex/
+├── ledgex_frontend/          # React application
+│   ├── public/               # Static assets & images
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── context/          # React Context (Auth, Theme)
+│   │   ├── pages/            # Main application views
+│   │   ├── services/         # Axios API services
+│   │   └── utils/            # Helper functions
+│   └── package.json
+│
+├── ledgex_backend/           # Spring Boot application
+│   ├── src/main/java/com/ledgex/
+│   │   ├── auth/             # Authentication & Security
+│   │   ├── transaction/      # Transaction logic
+│   │   ├── budget/           # Budget management
+│   │   ├── savings/          # Savings goals
+│   │   ├── subscription/     # Recurring subscriptions
+│   │   ├── analytics/        # Financial trends & metrics
+│   │   └── ai/               # Gemini API integration
+│   ├── src/main/resources/
+│   │   └── application.properties # Configuration
+│   └── pom.xml
+│
+└── README.md                 # Project documentation
+```
+
+## 🔌 API Endpoints (Major)
+
 | Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/ai/financial-insights` | Rule-based insights |
-| GET | `/api/v1/ai/gemini-insights` | Gemini-powered personalized advice |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/register` | Register a new user |
+| `POST` | `/api/v1/auth/login` | Authenticate and receive JWT |
+| `GET`  | `/api/v1/transactions` | Fetch user transactions (filterable) |
+| `GET`  | `/api/v1/analytics/overview` | Fetch high-level analytics KPIs |
+| `POST` | `/api/v1/ai/chat` | Send a message to the AI Financial Coach |
+
+## 🚀 Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/ledgex.git
+   cd ledgex
+   ```
+
+2. **Frontend Setup:**
+   ```bash
+   cd ledgex_frontend
+   npm install
+   npm run dev
+   ```
+
+3. **Backend Setup:**
+   - Ensure MySQL is running and create a database named `ledgex_db`.
+   - Update `application.properties` with your database credentials and Gemini API key.
+   ```bash
+   cd ledgex_backend
+   mvn clean install
+   mvn spring-boot:run
+   ```
+
+## 🚀 Future Improvements
+
+- **OCR Receipt Scanner**: Automatically extract transaction details from photos of receipts.
+- **Investment Tracking**: Integrate stock and crypto portfolio tracking alongside traditional banking.
+- **Bank Integration**: Connect live bank accounts via APIs (like Plaid) for real-time transaction syncing.
+- **Notifications**: Email and push notifications for budget limits and upcoming subscription renewals.
+- **Mobile App**: Port the responsive web design into a dedicated React Native mobile application for iOS and Android.
 
 ---
-
-## 🚀 Getting Started
-
-### Backend
-```bash
-cd ledgex_backend
-# Configure application.properties with your MySQL credentials & Gemini API key
-mvn spring-boot:run
-```
-Runs on `http://localhost:8080`
-
-### Frontend
-```bash
-cd ledgex_frontend
-npm install
-npm run dev
-```
-Runs on `http://localhost:5173`
-
----
-
 ## 🔮 Future Scope
 
 - Banking & UPI integration with real-time transaction sync
@@ -248,3 +192,6 @@ Nishka Shah
 ## 📄 License
 
 This project is for educational purposes.
+
+---
+*Built with ❤️ for better financial wellness.*

@@ -75,7 +75,7 @@ export default function SidebarLayout() {
       {/* Sidebar */}
       <aside 
         className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-700 transition-all duration-300 ease-in-out
-          w-64 md:w-20 lg:w-64 md:static md:translate-x-0
+          w-64 md:w-20 lg:w-64 md:sticky md:top-0 md:h-screen md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-gray-700 px-6 md:px-0 lg:px-6 py-5 md:h-16 lg:h-auto lg:py-5 md:justify-center lg:justify-start transition-colors duration-200">

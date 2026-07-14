@@ -145,6 +145,260 @@ export default function AiInsightsPage() {
     ...(geminiInsights?.risks || [])
   ].filter(Boolean);
 
+  const processWarnings = (rawWarningsList) => {
+    if (!rawWarningsList || rawWarningsList.length === 0) return [];
+
+    // Filter out empty or "no warnings" placeholders
+    const filteredWarnings = rawWarningsList.filter(w => {
+      if (!w) return false;
+      const lower = w.toLowerCase();
+      if (lower.includes("no critical risks") || lower.includes("no warnings") || lower.includes("finances look stable")) return false;
+      return true;
+    });
+
+    if (filteredWarnings.length === 0) return [];
+
+    const formatCategories = (categories) => {
+      if (categories.length === 0) return '';
+      if (categories.length === 1) return categories[0];
+      if (categories.length === 2) return `${categories[0]} and ${categories[1]}`;
+      return `${categories.slice(0, -1).join(', ')}, and ${categories[categories.length - 1]}`;
+    };
+
+    // 1. Classify each warning
+    const classified = filteredWarnings.map(warning => {
+      let desc = warning.trim();
+      // Clean up markdown bullet points or extra quotes
+      if (desc.startsWith('*') || desc.startsWith('-')) desc = desc.substring(1).trim();
+      if (desc.startsWith('"') && desc.endsWith('"')) desc = desc.slice(1, -1).trim();
+      desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+      if (!/[.!?]$/.test(desc)) desc += '.';
+
+      const lower = desc.toLowerCase();
+      
+      let topic = 'general';
+      let severity = 'Informational';
+      let category = '';
+      let utilization = '';
+
+      // Check category keywords first to identify if it belongs to a category
+      const categoriesList = ['food', 'dining', 'shopping', 'entertainment', 'travel', 'utilities', 'rent', 'groceries', 'grocery', 'transport', 'bills'];
+      for (const cat of categoriesList) {
+        if (lower.includes(cat)) {
+          category = cat.charAt(0).toUpperCase() + cat.slice(1);
+          if (category === 'Groceries') category = 'Grocery';
+          break;
+        }
+      }
+
+      // Check deficit
+      if (lower.includes('exceed income') || lower.includes('negative balance') || lower.includes('deficit') || lower.includes('exceeds income') || lower.includes('spending outpaced')) {
+        topic = 'deficit';
+        severity = 'Attention';
+      }
+      // Check budget exceeded
+      else if (lower.includes('exceeded') && lower.includes('budget')) {
+        topic = 'budget_exceeded';
+        severity = 'Attention';
+      }
+      // Check budget near limit
+      else if (lower.includes('budget') && (lower.includes('utilization') || lower.includes('near') || lower.includes('limit') || lower.includes('close to'))) {
+        topic = 'budget_near_limit';
+        severity = 'Near Limit';
+        
+        // Try to extract percentage
+        const pctMatch = lower.match(/(\d+)%/);
+        if (pctMatch) {
+          utilization = pctMatch[1];
+        }
+      }
+      // Check savings
+      else if (lower.includes('saving') || lower.includes('savings') || lower.includes('deposit')) {
+        topic = 'savings';
+        if (lower.includes('days') || lower.includes('approaching') || lower.includes('under') || lower.includes('missed')) {
+          severity = 'Near Limit';
+        } else {
+          severity = 'Informational';
+        }
+      }
+      // Check subscriptions
+      else if (lower.includes('subscription')) {
+        topic = 'subscriptions';
+        if (lower.includes('consuming') || lower.includes('high') || lower.includes('increasing')) {
+          severity = 'Near Limit';
+        } else {
+          severity = 'Informational';
+        }
+      }
+
+      // Generate concise Title
+      let title = 'Financial Alert';
+      if (topic === 'deficit') {
+        title = 'Monthly Deficit';
+      } else if (topic === 'budget_exceeded') {
+        title = category ? `${category} Budget` : 'Budget Exceeded';
+      } else if (topic === 'budget_near_limit') {
+        title = category ? `${category} Budget` : 'Budget Limit';
+      } else if (topic === 'savings') {
+        title = category ? `${category} Savings` : 'Savings Goals';
+      } else if (topic === 'subscriptions') {
+        title = 'Subscription Costs';
+      } else {
+        // Try keyword matching for title
+        const keywordMap = [
+          { keywords: ['grocery', 'groceries'], title: 'Grocery Spending' },
+          { keywords: ['food', 'dining', 'restaurant', 'meal', 'eat'], title: 'Food Budget' },
+          { keywords: ['shopping', 'clothing', 'clothes', 'apparel'], title: 'Shopping Budget' },
+          { keywords: ['entertainment', 'movie', 'show', 'netflix', 'spotify', 'leisure'], title: 'Entertainment Budget' },
+          { keywords: ['travel', 'vacation', 'trip', 'flight', 'hotel'], title: 'Travel Budget' },
+          { keywords: ['utility', 'electricity', 'water', 'gas', 'bill'], title: 'Utility Costs' },
+          { keywords: ['rent', 'housing', 'mortgage'], title: 'Housing Costs' },
+          { keywords: ['saving', 'savings', 'emergency fund'], title: 'Savings Goals' },
+          { keywords: ['invest', 'investment', 'portfolio', 'stock'], title: 'Investment Alert' },
+          { keywords: ['income', 'salary', 'earn'], title: 'Income Alert' },
+          { keywords: ['health score', 'financial health'], title: 'Financial Health' },
+          { keywords: ['deficit', 'exceed income', 'overspend', 'negative balance'], title: 'Monthly Deficit' },
+          { keywords: ['budget', 'budgets', 'limit'], title: 'Budget Limit' }
+        ];
+        const match = keywordMap.find(item => item.keywords.some(kw => lower.includes(kw)));
+        title = match ? match.title : (category ? `${category} Spending` : 'Financial Alert');
+      }
+
+      return {
+        title,
+        description: desc,
+        severity,
+        topic,
+        category,
+        utilization,
+        original: warning
+      };
+    });
+
+    // 2. Deduplicate / Merge Same-Category and Same-Topic Warnings
+    const uniqueItems = [];
+    classified.forEach(item => {
+      const duplicateIdx = uniqueItems.findIndex(existing => 
+        (existing.category && item.category && existing.category.toLowerCase() === item.category.toLowerCase() && existing.topic === item.topic) ||
+        (existing.topic === 'subscriptions' && item.topic === 'subscriptions') ||
+        (existing.topic === 'savings' && item.topic === 'savings')
+      );
+
+      if (duplicateIdx > -1) {
+        const existing = uniqueItems[duplicateIdx];
+        const hasNumber = (str) => /₹|\d+%|\d+/.test(str);
+        if (hasNumber(item.description) && !hasNumber(existing.description)) {
+          existing.description = item.description;
+        } else if (!hasNumber(item.description) && hasNumber(existing.description)) {
+          // Keep existing
+        } else {
+          if (item.description.length > existing.description.length) {
+            existing.description = item.description;
+          }
+        }
+        
+        // Upgrade severity if needed
+        const severityLevels = { 'Attention': 3, 'Near Limit': 2, 'Informational': 1 };
+        if (severityLevels[item.severity] > severityLevels[existing.severity]) {
+          existing.severity = item.severity;
+        }
+      } else {
+        uniqueItems.push(item);
+      }
+    });
+
+    // 3. Group Budget Categories Conditional on Threshold (> 3)
+    let processedList = [...uniqueItems];
+
+    const groupBudgetsBySeverity = (targetSeverity, groupTitle, groupTopic) => {
+      const budgetItems = processedList.filter(item => 
+        item.severity === targetSeverity && 
+        (item.topic === 'budget_exceeded' || item.topic === 'budget_near_limit' || item.title.toLowerCase().includes('budget'))
+      );
+
+      if (budgetItems.length > 3) {
+        const categories = [...new Set(budgetItems.map(item => item.category || 'Other').filter(Boolean))];
+        const percentages = budgetItems.map(item => parseInt(item.utilization)).filter(p => !isNaN(p));
+        let pctStr = "";
+        if (percentages.length > 0) {
+          const minPct = Math.min(...percentages);
+          pctStr = `above ${minPct}% of `;
+        } else if (targetSeverity === 'Near Limit') {
+          pctStr = "above 85% of ";
+        }
+
+        const description = `${formatCategories(categories)} are all ${pctStr}their monthly budgets.`;
+        
+        const groupedCard = {
+          title: groupTitle,
+          description,
+          severity: targetSeverity,
+          topic: groupTopic,
+          category: ''
+        };
+
+        processedList = processedList.filter(item => !budgetItems.includes(item));
+        processedList.push(groupedCard);
+      }
+    };
+
+    groupBudgetsBySeverity('Attention', 'Multiple Budgets Exceeded', 'budget_exceeded_grouped');
+    groupBudgetsBySeverity('Near Limit', 'Multiple Budgets Near Limit', 'budget_near_limit_grouped');
+
+    // 4. Sort by severity: Attention first, then Near Limit, then Informational
+    const severityOrder = { 'Attention': 1, 'Near Limit': 2, 'Informational': 3 };
+    processedList.sort((a, b) => {
+      return (severityOrder[a.severity] || 99) - (severityOrder[b.severity] || 99);
+    });
+
+    // 5. Limit the Watchlist to maximum of 5 cards, summarize the rest
+    const MAX_CARDS = 5;
+    if (processedList.length > MAX_CARDS) {
+      const keptCards = processedList.slice(0, MAX_CARDS - 1);
+      const remainingCards = processedList.slice(MAX_CARDS - 1);
+      
+      const summarizeRemaining = (remaining) => {
+        if (remaining.length === 0) return "";
+        const clauses = remaining.map(c => {
+          let clause = c.description.trim();
+          if (clause.endsWith('.')) clause = clause.slice(0, -1);
+          return clause.charAt(0).toLowerCase() + clause.slice(1);
+        });
+        
+        if (clauses.length === 1) {
+          return `Additionally, note that ${clauses[0]}.`;
+        }
+        if (clauses.length === 2) {
+          return `Additionally, note that ${clauses[0]}, and ${clauses[1]}.`;
+        }
+        return `Additionally, note that ${clauses.slice(0, -1).join(', ')}, and ${clauses[clauses.length - 1]}.`;
+      };
+
+      let highestSeverity = 'Informational';
+      const severityLevels = { 'Attention': 3, 'Near Limit': 2, 'Informational': 1 };
+      remainingCards.forEach(c => {
+        if (severityLevels[c.severity] > severityLevels[highestSeverity]) {
+          highestSeverity = c.severity;
+        }
+      });
+
+      const summaryCard = {
+        title: 'Additional Observations',
+        description: summarizeRemaining(remainingCards),
+        severity: highestSeverity,
+        topic: 'summary_overflow',
+        category: ''
+      };
+
+      processedList = [...keptCards, summaryCard];
+    }
+
+    return processedList;
+  };
+
+  const processedWarnings = processWarnings(warnings);
+
+
   const achievements = basicInsights?.achievements || [];
   
   const suggestedPrompts = [
@@ -346,24 +600,54 @@ export default function AiInsightsPage() {
               <AlertCircle className="w-5 h-5 text-amber-500 mr-2" />
               Watchlist
             </h2>
-            {warnings.length > 0 ? (
+            {processedWarnings.length > 0 ? (
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 transition-colors duration-200">
-                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 transition-colors duration-200">Budget Alerts</h3>
+                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 transition-colors duration-200">Active Alerts</h3>
                  <div className="flex flex-col gap-3">
-                  {warnings.map((warning, i) => {
-                    let cat = "General";
-                    let status = "Attention";
-                    if (warning.toLowerCase().includes('budget')) {
-                       cat = warning.split(' budget')[0].trim();
-                       status = "Near Limit";
-                    }
-                    cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+                  {processedWarnings.map((card, i) => {
+                    const getCardIcon = (topic) => {
+                      if (topic?.includes('budget')) return Wallet;
+                      if (topic?.includes('savings')) return PiggyBank;
+                      if (topic?.includes('subscription')) return CreditCard;
+                      if (topic === 'deficit') return TrendingDown;
+                      return AlertCircle;
+                    };
+                    const Icon = getCardIcon(card.topic);
+
                     return (
-                      <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-3 rounded-xl transition-colors duration-200">
-                        <span className="text-sm text-gray-800 dark:text-gray-200 font-bold transition-colors duration-200">{cat}</span>
-                        <span className="text-xs font-bold px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 transition-colors duration-200">{status}</span>
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/60 p-4 rounded-xl transition-all duration-200 hover:shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg shrink-0 ${
+                            card.severity === 'Attention' 
+                              ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400' 
+                              : card.severity === 'Near Limit'
+                              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400'
+                              : 'bg-blue-50 dark:bg-blue-950/30 text-blue-500 dark:text-blue-400'
+                          }`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white transition-colors duration-200">
+                              {card.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed transition-colors duration-200">
+                              {card.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="sm:self-center shrink-0">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border transition-colors duration-200 ${
+                            card.severity === 'Attention'
+                              ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-900/50'
+                              : card.severity === 'Near Limit'
+                              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/50'
+                              : 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-900/50'
+                          }`}>
+                            {card.severity}
+                          </span>
+                        </div>
                       </div>
-                    )
+                    );
                   })}
                  </div>
               </div>

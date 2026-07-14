@@ -12,11 +12,33 @@ import SubscriptionsPage from './pages/SubscriptionsPage'
 import TransactionsPage from './pages/TransactionsPage'
 
 import { Toaster } from 'react-hot-toast'
+import { useTheme } from './context/ThemeContext'
+import { useAuth } from './context/AuthContext'
 
 export default function App() {
+  const { theme } = useTheme()
+  const { loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-gray-950 transition-colors duration-200">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+      </div>
+    )
+  }
+
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: theme === 'dark' ? '#1f2937' : '#ffffff',
+            color: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+          },
+        }}
+      />
       <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

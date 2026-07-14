@@ -1,14 +1,20 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import api from '../api/axios'
 import { parseApiError } from '../utils/apiError'
 import { parseAuthResponse } from '../utils/authResponse'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Sun, Moon } from 'lucide-react'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,11 +45,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-gray-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div className="relative flex min-h-screen items-center justify-center bg-slate-50 dark:bg-gray-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+      <div className="absolute top-4 right-4">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="p-2.5 rounded-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white shadow-sm hover:shadow transition-all duration-200 cursor-pointer"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
+      </div>
       <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-xl transition-colors duration-200">
         <div className="mb-8 flex flex-col items-center text-center">
           <img src="/logo.png" alt="LedgeX Logo" className="h-16 w-auto mb-4" />
-          <h1 className="text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-500 transition-colors duration-200">LedgeX</h1>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white transition-colors duration-200">
             Welcome back
           </h2>
