@@ -39,10 +39,6 @@ export default function LoginPage() {
     }
   }
 
-  function handleDevLogin() {
-    login('dev-token', { email: 'demo@ledgex.com', name: 'Demo User' })
-    navigate('/')
-  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-slate-50 dark:bg-gray-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
@@ -148,17 +144,6 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        {import.meta.env.DEV && (
-          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-gray-800 transition-colors duration-200">
-            <button
-              type="button"
-              onClick={handleDevLogin}
-              className="w-full rounded-lg bg-slate-100 dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-gray-300 transition-colors hover:bg-slate-200 dark:hover:bg-gray-700"
-            >
-              Continue as demo user
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )

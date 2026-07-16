@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import { getCategoryBadgeClass } from '../utils/colors';
 
+const EXPENSE_CATEGORIES = ['Food', 'Shopping', 'Entertainment', 'Transport', 'Utilities', 'Healthcare', 'Others'];
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Bonus', 'Dividend', 'Interest', 'Rental Income', 'Cashback', 'Refund', 'Gift', 'Others'];
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,11 +25,12 @@ export default function TransactionsPage() {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
-    category: '',
+    category: 'Food',
     type: 'EXPENSE',
     transactionDate: new Date().toISOString().split('T')[0]
   });
   const [formError, setFormError] = useState('');
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
 
   // Toast
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -63,15 +67,22 @@ export default function TransactionsPage() {
         type: transaction.type,
         transactionDate: transaction.transactionDate
       });
+      const predefined = transaction.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+      if (!predefined.includes(transaction.category)) {
+        setShowCustomCategory(true);
+      } else {
+        setShowCustomCategory(false);
+      }
     } else {
       setCurrentTransaction(null);
       setFormData({
         title: '',
         amount: '',
-        category: '',
+        category: 'Food',
         type: 'EXPENSE',
         transactionDate: new Date().toISOString().split('T')[0]
       });
+      setShowCustomCategory(false);
     }
     setIsModalOpen(true);
   };
@@ -399,7 +410,10 @@ export default function TransactionsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, type: 'INCOME' })}
+                    onClick={() => {
+                      setFormData({ ...formData, type: 'INCOME', category: 'Salary' });
+                      setShowCustomCategory(false);
+                    }}
                     className={`py-2 text-sm font-medium rounded-lg border transition-colors ${
                       formData.type === 'INCOME' 
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400' 
@@ -410,7 +424,10 @@ export default function TransactionsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, type: 'EXPENSE' })}
+                    onClick={() => {
+                      setFormData({ ...formData, type: 'EXPENSE', category: 'Food' });
+                      setShowCustomCategory(false);
+                    }}
                     className={`py-2 text-sm font-medium rounded-lg border transition-colors ${
                       formData.type === 'EXPENSE' 
                         ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400' 
@@ -451,14 +468,47 @@ export default function TransactionsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Category</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="e.g. Salary, Food"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
-                  />
+                  {!showCustomCategory ? (
+                    <select
+                      required
+                      value={formData.category}
+                      onChange={(e) => {
+                        if (e.target.value === 'Others') {
+                          setShowCustomCategory(true);
+                          setFormData({ ...formData, category: '' });
+                        } else {
+                          setFormData({ ...formData, category: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
+                    >
+                      {(formData.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        required
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        placeholder="Custom..."
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setShowCustomCategory(false);
+                          setFormData({ ...formData, category: formData.type === 'INCOME' ? 'Salary' : 'Food' });
+                        }}
+                        className="px-3 py-2 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 rounded-lg text-sm hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+                        title="Back to predefined categories"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Date</label>

@@ -183,6 +183,18 @@ ledgex/
 
 ---
 
+## 🔑 Demo Account
+
+If you want to explore the application without creating a new account, you can use the following demo credentials. This account comes pre-populated with realistic financial data.
+
+**Email:**
+`nishka@ledgex.demo`
+
+**Password:**
+`password123`
+
+---
+
 ## 👤 Author
 
 Nishka Shah

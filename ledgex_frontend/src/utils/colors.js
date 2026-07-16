@@ -5,7 +5,16 @@ const explicitMapping = {
   'Transport': { bgClass: 'bg-red-100 dark:bg-red-900/20', textClass: 'text-red-700 dark:text-red-400', hex: '#ef4444' },
   'Utilities': { bgClass: 'bg-indigo-100 dark:bg-indigo-900/20', textClass: 'text-indigo-700 dark:text-indigo-400', hex: '#6366f1' },
   'Healthcare': { bgClass: 'bg-cyan-100 dark:bg-cyan-900/20', textClass: 'text-cyan-700 dark:text-cyan-400', hex: '#06b6d4' },
-  'Salary': { bgClass: 'bg-green-100 dark:bg-green-900/20', textClass: 'text-green-700 dark:text-green-400', hex: '#22c55e' }
+  'Salary': { bgClass: 'bg-green-100 dark:bg-green-900/20', textClass: 'text-green-700 dark:text-green-400', hex: '#22c55e' },
+  'Freelance': { bgClass: 'bg-teal-100 dark:bg-teal-900/20', textClass: 'text-teal-700 dark:text-teal-400', hex: '#14b8a6' },
+  'Bonus': { bgClass: 'bg-amber-100 dark:bg-amber-900/20', textClass: 'text-amber-700 dark:text-amber-400', hex: '#f59e0b' },
+  'Dividend': { bgClass: 'bg-indigo-100 dark:bg-indigo-900/20', textClass: 'text-indigo-700 dark:text-indigo-400', hex: '#6366f1' },
+  'Interest': { bgClass: 'bg-blue-100 dark:bg-blue-900/20', textClass: 'text-blue-700 dark:text-blue-400', hex: '#3b82f6' },
+  'Rental Income': { bgClass: 'bg-orange-100 dark:bg-orange-900/20', textClass: 'text-orange-700 dark:text-orange-400', hex: '#f97316' },
+  'Cashback': { bgClass: 'bg-pink-100 dark:bg-pink-900/20', textClass: 'text-pink-700 dark:text-pink-400', hex: '#ec4899' },
+  'Refund': { bgClass: 'bg-rose-100 dark:bg-rose-900/20', textClass: 'text-rose-700 dark:text-rose-400', hex: '#f43f5e' },
+  'Gift': { bgClass: 'bg-fuchsia-100 dark:bg-fuchsia-900/20', textClass: 'text-fuchsia-700 dark:text-fuchsia-400', hex: '#d946ef' },
+  'Other Income': { bgClass: 'bg-gray-100 dark:bg-gray-800', textClass: 'text-gray-700 dark:text-gray-400', hex: '#6b7280' }
 };
 
 const fallbackPalette = [

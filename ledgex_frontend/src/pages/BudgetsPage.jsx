@@ -5,6 +5,8 @@ import { Plus, Edit2, Trash2, X, AlertCircle, Target, Wallet, TrendingDown } fro
 import { getCategoryBadgeClass } from '../utils/colors';
 import PageHeader from '../components/PageHeader';
 
+const EXPENSE_CATEGORIES = ['Food', 'Shopping', 'Entertainment', 'Transport', 'Utilities', 'Healthcare', 'Others'];
+
 export default function BudgetsPage() {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
@@ -26,6 +28,7 @@ export default function BudgetsPage() {
     year: selectedYear
   });
   const [formError, setFormError] = useState('');
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -58,14 +61,20 @@ export default function BudgetsPage() {
         month: Number(budget.month),
         year: Number(budget.year)
       });
+      if (!EXPENSE_CATEGORIES.includes(String(budget.category || ''))) {
+        setShowCustomCategory(true);
+      } else {
+        setShowCustomCategory(false);
+      }
     } else {
       setCurrentBudget(null);
       setFormData({
-        category: '',
+        category: 'Food',
         monthlyLimit: '',
         month: selectedMonth,
         year: selectedYear
       });
+      setShowCustomCategory(false);
     }
     setIsModalOpen(true);
   };
@@ -384,15 +393,50 @@ export default function BudgetsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1 transition-colors">Category</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g. Groceries, Entertainment"
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
-                  disabled={isSaving}
-                />
+                {!showCustomCategory ? (
+                  <select
+                    required
+                    value={formData.category}
+                    onChange={(e) => {
+                      if (e.target.value === 'Others') {
+                        setShowCustomCategory(true);
+                        setFormData({ ...formData, category: '' });
+                      } else {
+                        setFormData({ ...formData, category: e.target.value });
+                      }
+                    }}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
+                    disabled={isSaving}
+                  >
+                    {EXPENSE_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      placeholder="Custom..."
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
+                      disabled={isSaving}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setShowCustomCategory(false);
+                        setFormData({ ...formData, category: 'Food' });
+                      }}
+                      className="px-3 py-2 bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 rounded-lg text-sm hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+                      title="Back to predefined categories"
+                      disabled={isSaving}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>

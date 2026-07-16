@@ -33,7 +33,7 @@ DELETE FROM subscriptions WHERE user_id = @user_id;
 
 INSERT INTO transactions (user_id, title, description, amount, type, category, transaction_date, created_at, updated_at) VALUES
 -- JANUARY 2026 (Baseline Month)
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 52000.00, 'INCOME', 'Income', '2026-01-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 52000.00, 'INCOME', 'Salary', '2026-01-01', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Dinner delivery', 1250.00, 'EXPENSE', 'Food', '2026-01-04', NOW(), NOW()),
 (@user_id, 'Amazon', 'Household items', 3450.00, 'EXPENSE', 'Shopping', '2026-01-08', NOW(), NOW()),
 (@user_id, 'Uber', 'Office commute', 450.00, 'EXPENSE', 'Transport', '2026-01-12', NOW(), NOW()),
@@ -45,7 +45,7 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Blinkit', 'Quick groceries', 600.00, 'EXPENSE', 'Food', '2026-01-30', NOW(), NOW()),
 
 -- FEBRUARY 2026 (Shopping Spike)
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 52000.00, 'INCOME', 'Income', '2026-02-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 52000.00, 'INCOME', 'Salary', '2026-02-01', NOW(), NOW()),
 (@user_id, 'Myntra', 'Wardrobe upgrade', 6500.00, 'EXPENSE', 'Shopping', '2026-02-05', NOW(), NOW()),
 (@user_id, 'Amazon', 'Electronics', 4200.00, 'EXPENSE', 'Shopping', '2026-02-10', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Late night food', 800.00, 'EXPENSE', 'Food', '2026-02-14', NOW(), NOW()),
@@ -55,7 +55,7 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Grocery Store', 'Monthly supplies', 3100.00, 'EXPENSE', 'Food', '2026-02-25', NOW(), NOW()),
 
 -- MARCH 2026 (Food Overspend)
-(@user_id, 'Monthly Salary', 'TechCorp Inc. - Appraised', 54000.00, 'INCOME', 'Income', '2026-03-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc. - Appraised', 54000.00, 'INCOME', 'Salary', '2026-03-01', NOW(), NOW()),
 (@user_id, 'Zomato', 'Team lunch', 1550.00, 'EXPENSE', 'Food', '2026-03-03', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Dinner delivery', 2100.00, 'EXPENSE', 'Food', '2026-03-07', NOW(), NOW()),
 (@user_id, 'Blinkit', 'Snacks', 1850.00, 'EXPENSE', 'Food', '2026-03-12', NOW(), NOW()),
@@ -63,9 +63,10 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Uber', 'Travel to event', 800.00, 'EXPENSE', 'Transport', '2026-03-18', NOW(), NOW()),
 (@user_id, 'Electricity Bill', 'Monthly utility', 2300.00, 'EXPENSE', 'Utilities', '2026-03-20', NOW(), NOW()),
 (@user_id, 'Pharmacy', 'Checkup meds', 1200.00, 'EXPENSE', 'Healthcare', '2026-03-28', NOW(), NOW()),
+(@user_id, 'Bank Interest', 'Q1 Interest', 1250.00, 'INCOME', 'Interest', '2026-03-31', NOW(), NOW()),
 
 -- APRIL 2026 (Stable Month)
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 54000.00, 'INCOME', 'Income', '2026-04-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 54000.00, 'INCOME', 'Salary', '2026-04-01', NOW(), NOW()),
 (@user_id, 'Netflix', 'Monthly subscription', 649.00, 'EXPENSE', 'Entertainment', '2026-04-04', NOW(), NOW()),
 (@user_id, 'Amazon', 'Books', 2150.00, 'EXPENSE', 'Shopping', '2026-04-09', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Weekend food', 1100.00, 'EXPENSE', 'Food', '2026-04-12', NOW(), NOW()),
@@ -74,7 +75,7 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Grocery Store', 'Monthly supplies', 3200.00, 'EXPENSE', 'Food', '2026-04-25', NOW(), NOW()),
 
 -- MAY 2026 (High Transport Costs)
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 56000.00, 'INCOME', 'Income', '2026-05-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 56000.00, 'INCOME', 'Salary', '2026-05-01', NOW(), NOW()),
 (@user_id, 'Uber', 'Airport drop', 2550.00, 'EXPENSE', 'Transport', '2026-05-03', NOW(), NOW()),
 (@user_id, 'Ola', 'Outstation travel', 1800.00, 'EXPENSE', 'Transport', '2026-05-08', NOW(), NOW()),
 (@user_id, 'Petrol Station', 'Road trip fuel', 4500.00, 'EXPENSE', 'Transport', '2026-05-15', NOW(), NOW()),
@@ -82,9 +83,10 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Swiggy', 'Dinner', 1450.00, 'EXPENSE', 'Food', '2026-05-22', NOW(), NOW()),
 (@user_id, 'Amazon', 'Travel gear', 1550.00, 'EXPENSE', 'Shopping', '2026-05-26', NOW(), NOW()),
 (@user_id, 'Electricity Bill', 'Monthly utility', 3100.00, 'EXPENSE', 'Utilities', '2026-05-29', NOW(), NOW()),
+(@user_id, 'Dividend Credit', 'Tech Stock Dividend', 4500.00, 'INCOME', 'Dividend', '2026-05-30', NOW(), NOW()),
 
 -- JUNE 2026 (Recent Month)
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 58000.00, 'INCOME', 'Income', '2026-06-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 58000.00, 'INCOME', 'Salary', '2026-06-01', NOW(), NOW()),
 (@user_id, 'Netflix', 'Monthly subscription', 649.00, 'EXPENSE', 'Entertainment', '2026-06-02', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Lunch delivery', 1250.00, 'EXPENSE', 'Food', '2026-06-06', NOW(), NOW()),
 (@user_id, 'Grocery Store', 'Monthly supplies', 3800.00, 'EXPENSE', 'Food', '2026-06-10', NOW(), NOW()),
@@ -92,8 +94,9 @@ INSERT INTO transactions (user_id, title, description, amount, type, category, t
 (@user_id, 'Petrol Station', 'Car fuel', 2500.00, 'EXPENSE', 'Transport', '2026-06-18', NOW(), NOW()),
 (@user_id, 'Electricity Bill', 'Monthly utility', 3550.00, 'EXPENSE', 'Utilities', '2026-06-22', NOW(), NOW()),
 (@user_id, 'Pharmacy', 'Supplements', 650.00, 'EXPENSE', 'Healthcare', '2026-06-28', NOW(), NOW()),
+(@user_id, 'Freelance Payment', 'Web Design Project', 15000.00, 'INCOME', 'Freelance', '2026-06-30', NOW(), NOW()),
 
-(@user_id, 'Monthly Salary', 'TechCorp Inc.', 58000.00, 'INCOME', 'Income', '2026-07-01', NOW(), NOW()),
+(@user_id, 'Monthly Salary', 'TechCorp Inc.', 58000.00, 'INCOME', 'Salary', '2026-07-01', NOW(), NOW()),
 (@user_id, 'Netflix', 'Monthly subscription', 649.00, 'EXPENSE', 'Entertainment', '2026-07-02', NOW(), NOW()),
 (@user_id, 'Amazon', 'Home decor', 3100.00, 'EXPENSE', 'Shopping', '2026-07-04', NOW(), NOW()),
 (@user_id, 'Swiggy', 'Dinner delivery', 1450.00, 'EXPENSE', 'Food', '2026-07-07', NOW(), NOW()),
