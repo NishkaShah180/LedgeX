@@ -2,7 +2,6 @@
   <img src="ledgex_frontend/public/logo.png" alt="LedgeX Logo" width="150"/>
   <h1>LedgeX</h1>
   <p><strong>Smart Personal Finance & Financial Wellness Platform</strong></p>
-  <img src="ledgex_frontend/public/hero.png" alt="LedgeX Hero" width="800"/>
 </div>
 
 ## 📖 About
