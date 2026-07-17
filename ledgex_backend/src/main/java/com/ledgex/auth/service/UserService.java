@@ -42,7 +42,11 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                savedUser.getEmail(),
+                savedUser.getPassword(),
+                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+        );
         String token = jwtService.generateToken(userDetails);
 
         return buildAuthResponse(savedUser, token);
@@ -56,7 +60,11 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+        );
         String token = jwtService.generateToken(userDetails);
 
         return buildAuthResponse(user, token);
