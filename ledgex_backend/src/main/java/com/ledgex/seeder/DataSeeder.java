@@ -46,15 +46,16 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         log.info("--- DataSeeder Started ---");
         
-        log.info("Clearing old demo data before seeding...");
-        transactionRepository.deleteAll();
-        budgetRepository.deleteAll();
-        savingsGoalRepository.deleteAll();
-        subscriptionRepository.deleteAll();
-
         List<User> users = seedUsers();
         if (!users.isEmpty()) {
             User demoUser = users.get(0);
+
+            log.info("Clearing old demo data for user: {}", demoUser.getEmail());
+            transactionRepository.deleteByUserId(demoUser.getId());
+            budgetRepository.deleteByUserId(demoUser.getId());
+            savingsGoalRepository.deleteByUserId(demoUser.getId());
+            subscriptionRepository.deleteByUserId(demoUser.getId());
+
             seedTransactions(demoUser);
             seedBudgets(demoUser);
             seedSavingsGoals(demoUser);

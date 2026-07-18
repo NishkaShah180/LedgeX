@@ -15,4 +15,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     List<Subscription> findByUserIdAndIsActiveTrueOrderByNextBillingDateAsc(Long userId);
 
     Optional<Subscription> findByIdAndUserId(Long id, Long userId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Subscription s WHERE s.user.id = :userId")
+    void deleteByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

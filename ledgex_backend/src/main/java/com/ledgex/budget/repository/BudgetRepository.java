@@ -21,4 +21,8 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     boolean existsByUserIdAndCategoryAndMonthAndYearAndIdNot(
             Long userId, String category, Integer month, Integer year, Long id
     );
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Budget b WHERE b.user.id = :userId")
+    void deleteByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

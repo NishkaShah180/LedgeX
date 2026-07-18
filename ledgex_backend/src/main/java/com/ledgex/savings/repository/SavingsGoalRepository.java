@@ -13,4 +13,8 @@ public interface SavingsGoalRepository extends JpaRepository<SavingsGoal, Long> 
     List<SavingsGoal> findByUserIdOrderByTargetDateAsc(Long userId);
 
     Optional<SavingsGoal> findByIdAndUserId(Long id, Long userId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM SavingsGoal s WHERE s.user.id = :userId")
+    void deleteByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 }
