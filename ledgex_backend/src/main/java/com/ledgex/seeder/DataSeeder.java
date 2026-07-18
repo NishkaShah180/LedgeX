@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "app.seeder.enabled", havingValue ="false")
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
